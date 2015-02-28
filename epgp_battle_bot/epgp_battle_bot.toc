@@ -5,6 +5,7 @@
 ## Notes: Addon for automatic GP charging by combatlog events
 ## Notes-ruRU: Аддон для автоматического начисления GP по событиям в логах сражений
 ## SavedVariables: config
+## RequiredDeps: epgp
 ## DefaultState: enabled
 ## X-Website: https://github.com/hurricup/WoW-EPGP-BattleBot
 ## X-Feedback: https://github.com/hurricup/WoW-EPGP-BattleBot/issues
