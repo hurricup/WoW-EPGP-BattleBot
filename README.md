@@ -12,18 +12,19 @@ This addon works only with epgp addon installed:
 * http://www.curse.com/addons/wow/epgp-dkp-reloaded
 
 #CONFIGURATION
-Addon configuration may be managed via `/epgpbb` slash commands:
+Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
 
-* `/epgpbb help` - display configuration help 
-* `/epgpbb list` - list of current configuration
-* `/epgpbb add GP_value on event` - add new rule to charge GP on event. Events are:
+* `/ebb help` - display configuration help 
+* `/ebb announce` - announce active rules to a raid chat
+* `/ebb list` - list of current configuration
+* `/ebb add GP_value on event` - add new rule to charge GP on event. Events are:
   * `death by spell_id` - charge GP on taking damage with overkill from spell by id
   * `damage by spell_id` - charge GP on taking damage from spell by id
   * `buff spell_id [stacks min_staks]` - charge GP to players, gathered min_staks of buff/debuff (NYI)
-* `/epgpbb del rule_id` - delete rule by id
-* `/epgpbb enable rule_id` - enable rule by id
-* `/epgpbb disable rule_id` - disable rule by id
-* `/epgpbb reset` - reset configuration
+* `/ebb del rule_id` - delete rule by id
+* `/ebb enable rule_id` - enable rule by id
+* `/ebb disable rule_id` - disable rule by id
+* `/ebb reset` - reset configuration
 
 #LINKS
 * Repository: https://github.com/hurricup/WoW-EPGP-BattleBot
