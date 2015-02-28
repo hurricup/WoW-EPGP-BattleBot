@@ -1,0 +1,14 @@
+## Interface: 60100
+# WowRaider EPGP Battle Bot by WowRaider.Net
+# Website: http://wowraider.net
+## Title: EPGP Battle Bot by WowRaider.Net
+## Notes: Addon for automatic GP charging by combatlog events
+## Notes-ruRU: Аддон для автоматического начисления GP по событиям в логах сражений
+## SavedVariables: config
+## DefaultState: enabled
+## X-Website: https://github.com/hurricup/WoW-EPGP-BattleBot
+## X-Feedback: https://github.com/hurricup/WoW-EPGP-BattleBot/issues
+## X-Localizations: enUS
+locale-en.lua
+battle_bot.lua
+battle_bot.xml
