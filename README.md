@@ -1,8 +1,15 @@
 #DESCRIPTION
 World of Warcraft addon for automatic GP charging by combatlog events: deaths,
-damage, debuffs. May be useful for new encounters and save your raid time.
+damage, debuffs. May be useful for saving your raid time due to the new 
+encounters mastering.
 
 You may add/remove/enable/disable rules via console commands.
+
+#DEPENDENCIES
+
+This addon works only with epgp addon installed:
+
+* http://www.curse.com/addons/wow/epgp-dkp-reloaded
 
 #CONFIGURATION
 Addon configuration may be managed via `/epgpbb` slash commands:
