@@ -44,7 +44,11 @@ function battle_bot_add_rule( section, item, gp_value)
             , battle_bot_get_rule_as_string(item)
         )
     end
-    
+
+    battle_bot_smart_announce(announce)
+end
+
+function battle_bot_smart_announce(announce)
     if( announce ~= "" ) then
         if( UnitInRaid('player') == nil ) then
             print(announce)
@@ -136,20 +140,18 @@ function battle_bot_get_rules_text()
     for _, subtable in pairs(config_keys) do
         if( config[subtable] ) then
             for _, item in pairs(config[subtable]) do
-                is_enabled = EPGP_BB_DISABLED
+                local newitem = {
+                    ["enabled"] = item["enabled"],
+                    ["enabled_text"] = EPGP_BB_DISABLED,
+                    ["counter"] = counter,
+                    ["rule"] = battle_bot_get_rule_as_string(item),
+                }
                 
                 if( item["enabled"] ) then
-                    is_enabled = EPGP_BB_ENABLED
+                    newitem["enabled_text"] = EPGP_BB_ENABLED
                 end
 
-                table.insert(
-                    result
-                    , {
-                        ["counter"] = counter,
-                        ["enabled"] = is_enabled,
-                        ["rule"] = battle_bot_get_rule_as_string(item),
-                    }
-                )
+                table.insert( result, newitem )
                 
                 counter = counter + 1
             end
@@ -166,7 +168,7 @@ function battle_bot_list_handler( cmd, tail )
             string.format(
                 EPGP_BB_RULE_PH
                 , rule["counter"]
-                , rule["enabled"]
+                , rule["enabled_text"]
                 , rule["rule"]
             )
         )
@@ -186,7 +188,7 @@ function battle_bot_announce_handler( cmd, tail )
        
         SendChatMessage(EPGP_BB_ACTIVE_RULES_HEADER, tail)
         for _, rule in pairs(rules) do
-            if( rule["enabled"] == EPGP_BB_ENABLED ) then
+            if( rule["enabled"] ) then
                 SendChatMessage( 
                     "    "..rule["rule"]
                     , tail
