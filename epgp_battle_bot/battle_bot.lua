@@ -1,8 +1,4 @@
 local version = "6.1"
-local cfg_death
-local cfg_damage_done
-local cfg_damage_taken
-local cfg_buff
 
 -- @todo rulesets
 
@@ -217,13 +213,15 @@ function battle_bot_get_rule_by_number(counter)
             end
         end
     end
+
+    if( counter == nil ) then
+        counter = ""
+    end
+    print( string.format( EPGP_BB_RULE_NOT_FOUND, counter ))
+    
 end
 
 function battle_bot_del_handler( cmd, tail )
-
-    if( tail == nil ) then
-        tail = ""
-    end
 
     local subtable, key = battle_bot_get_rule_by_number(tail)
    
@@ -234,18 +232,34 @@ function battle_bot_del_handler( cmd, tail )
             EPGP_BB_RULE_DELETED
             , battle_bot_get_rule_as_string(item)
         ))
-    else
-        print( string.format( EPGP_BB_RULE_NOT_FOUND, tail ))
+        battle_bot_list_handler();
     end
-    battle_bot_list_handler();
 end
 
 function battle_bot_enable_handler( cmd, tail )
-    print( cmd, tail);
+    local subtable, key = battle_bot_get_rule_by_number(tail)
+   
+    if( key ~= nil ) then
+        config[subtable][key]["enabled"] = true
+        battle_bot_smart_announce(string.format(
+            EPGP_BB_RULE_ENABLED
+            , battle_bot_get_rule_as_string(config[subtable][key])
+        ))
+        battle_bot_list_handler();
+    end
 end
 
 function battle_bot_disable_handler( cmd, tail )
-    print( cmd, tail);
+    local subtable, key = battle_bot_get_rule_by_number(tail)
+    
+    if( key ~= nil ) then
+        config[subtable][key]["enabled"] = false
+        battle_bot_smart_announce(string.format(
+            EPGP_BB_RULE_DISABLED
+            , battle_bot_get_rule_as_string(config[subtable][key])
+        ))
+        battle_bot_list_handler();
+    end
 end
 
 function battle_bot_help_handler()
@@ -281,10 +295,6 @@ function battle_bot_validate_config()
 
     battle_bot_check_config_keys()
  
-    cfg_death = config["death"];
-    cfg_damage_done = config["damage_done"];
-    cfg_damage_taken = config["damage_taken"];
-    cfg_buff = config["buff"];
 end
 
 function battle_bot_init()
