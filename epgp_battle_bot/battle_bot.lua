@@ -8,24 +8,18 @@ local cfg_buff
 
 local config_keys = {
     "death",
-    "damage_done",
-    "damage_taken",
+    "damagedone",
+    "damagetaken",
     "buff",
 };
 -- /ebb add 150 on death by 156554 Успел на поезд
 -- /ebb add 150 on buff by 154960 Приколист
-function battle_bot_add_rule( section, item, comment, gp_value)
+function battle_bot_add_rule( section, item, gp_value)
     item["enabled"] = true
-    item["comment"] = comment
     item["section"] = section
     item["gp_value"] = gp_value
     
-    if( 
-        ( not item["comment"] or item["comment"] == "" )
-        and item["spellid"] 
-    ) then
-        item["comment"] = GetSpellInfo(item["spellid"])
-    end
+    item["comment"] = GetSpellInfo(item["spellid"])
 
     local found = false
     
@@ -67,35 +61,19 @@ function battle_bot_reset_handler()
 end
 
 function battle_bot_add_handler( cmd, tail )                           
-    gp_value, action_base, action_ext, actor, comment = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
-    if( action_base == 'damagedone' ) then
+    gp_value, action_base, action_ext, actor = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
+    if( 
+        action_base == 'damagedone' 
+        or action_base == 'death'
+        or action_base == 'buff'
+    ) then
         if( action_ext == 'by' ) then
             local item = {
                 ['type'] = 'spellid',
                 ['spellid'] = actor,
             }
             
-            battle_bot_add_rule( 'damage_done', item, comment, gp_value )
-        else
-            battle_bot_help_handler();
-        end
-    elseif( action_base == 'death' ) then
-        if( action_ext == 'by' ) then
-            item = {
-                ['type'] = 'spellid',
-                ['spellid'] = actor,
-            }
-            battle_bot_add_rule( 'death', item, comment, gp_value )
-        else
-            battle_bot_help_handler();
-        end
-    elseif( action_base == 'buff' ) then
-        if( action_ext == 'by' ) then
-            item = {
-                ['type'] = 'spellid',
-                ['spellid'] = actor,
-            }
-            battle_bot_add_rule( 'buff', item, comment, gp_value )
+            battle_bot_add_rule( action_base, item, gp_value )
         else
             battle_bot_help_handler();
         end
@@ -138,45 +116,27 @@ end
 function battle_bot_get_rules_text()
     local result = {}
     local counter = 1
-    
-    if( config["death"] ) then
-        for _, item in pairs(config["death"]) do
-            is_enabled = EPGP_BB_DISABLED
-            
-            if( item["enabled"] ) then
-                is_enabled = EPGP_BB_ENABLED
-            end
-            
-            table.insert(
-                result, string.format(
-                    EPGP_BB_RULE_PH
-                    , counter
-                    , is_enabled
-                    , battle_bot_get_rule_as_string(item)
+
+    for _, subtable in pairs({'death', 'buff'}) do
+        if( config[subtable] ) then
+            for _, item in pairs(config[subtable]) do
+                is_enabled = EPGP_BB_DISABLED
+                
+                if( item["enabled"] ) then
+                    is_enabled = EPGP_BB_ENABLED
+                end
+
+                table.insert(
+                    result
+                    , {
+                        ["counter"] = counter,
+                        ["enabled"] = is_enabled,
+                        ["rule"] = battle_bot_get_rule_as_string(item),
+                    }
                 )
-            )
-            
-            counter = counter + 1
-        end
-    end
-    if( config["buff"] ) then
-        for _, item in pairs(config["buff"]) do
-            is_enabled = EPGP_BB_DISABLED
-            
-            if( item["enabled"] ) then
-                is_enabled = EPGP_BB_ENABLED
+                
+                counter = counter + 1
             end
-            
-            table.insert(
-                result
-                , string.format(
-                    EPGP_BB_RULE_PH
-                    , counter
-                    , is_enabled
-                    , battle_bot_get_rule_as_string(item)
-                )
-            )
-            counter = counter + 1
         end
     end
     
@@ -186,17 +146,39 @@ end
 function battle_bot_list_handler( cmd, tail )
     local rules = battle_bot_get_rules_text()
     for _, rule in pairs(rules) do
-        print(rule)
+        print(
+            string.format(
+                EPGP_BB_RULE_PH
+                , rule["counter"]
+                , rule["enabled"]
+                , rule["rule"]
+            )
+        )
     end
 end
 
 function battle_bot_announce_handler( cmd, tail )
-    local rules = battle_bot_get_rules_text()
-    for _, rule in pairs(rules) do
-        SendChatMessage( 
-            rule
-            , tail
-        )
+    local channel = string.lower(tail);
+    
+    if( 
+        channel == 'raid'
+        or channel == 'guild'
+        or channel == 'say'
+        or channel == 'party'
+    ) then
+        local rules = battle_bot_get_rules_text(EPGP_BB_ACTIVE_RULE_PH)
+       
+        SendChatMessage(EPGP_BB_ACTIVE_RULES_HEADER, tail)
+        for _, rule in pairs(rules) do
+            if( rule["enabled"] == EPGP_BB_ENABLED ) then
+                SendChatMessage( 
+                    "    "..rule["rule"]
+                    , tail
+                )
+            end
+        end
+    else
+        battle_bot_help_handler();
     end
 end
 
