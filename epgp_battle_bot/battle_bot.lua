@@ -1,6 +1,11 @@
 local version = "6.1"
 
 -- @todo rulesets
+-- @todo exclude tanks (bleeds on darmak)
+-- @todo interupters penalties
+-- @todo limitation of one hit
+-- @todo instant or periodic damage
+-- @todo geom control of rooms, void zones dropping?
 
 local config_keys = {
     "death",
@@ -8,9 +13,21 @@ local config_keys = {
     "damagetaken",
     "buff",
 };
--- /ebb add 150 on death by 156554 Успел на поезд
--- /ebb add 150 on buff by 154960 Приколист
--- /ebb add 150 on buff by 154960 10
+-- /ebb add 150 on death by 156554 
+-- /ebb add 150 on buff by 154960
+-- /ebb add 50 on damagetaken by 157247 -- sound rings
+-- /ebb add 50 on damagetaken by 158140 -- franzok
+-- /ebb add 50 on damagetaken by 161570 -- matrac
+-- /ebb add 150 on death by 156938 -- tank capture
+-- /ebb add 150 on death by 154938 -- not shared meteor
+-- /ebb add 50 on buff by 155314 -- cumshots from anvil
+-- /ebb add 150 on buff by 154989 3 -- breath stacks
+-- /ebb add 150 on damagetaken by 160050 -- burrowed bomb
+-- /ebb add 150 on damagetaken by 157659 -- kromogg cone
+-- /ebb add 150 on damagetaken by 161839 -- kromogg bad rune
+-- /ebb add 150 on damagetaken by 157884 -- bomb explosion
+-- /ebb add 150 on damagetaken by 160733 -- bomb landing
+-- /ebb add 150 on damagetaken by 176133 -- elem explosion
 function battle_bot_add_rule( section, item, gp_value)
     item["enabled"] = true
     item["section"] = section
@@ -71,7 +88,7 @@ end
 function battle_bot_add_handler( cmd, tail )                           
     gp_value, action_base, action_ext, actor, tail = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
     if( 
-        action_base == 'damagedone' 
+        action_base == 'damagetaken' 
         or action_base == 'death'
         or action_base == 'buff'
     ) then
@@ -99,10 +116,17 @@ end
 
 function battle_bot_get_rule_as_string( item )
     local result
-    
+
+-- /ebb add 150 on damagetaken by 157247    
     if( item['section'] == 'death' ) then
         result = string.format(
             EPGP_BB_RULE_DEATH_BY_PH
+            , item["gp_value"]
+            , (GetSpellLink(item["spellid"]))
+        )
+    elseif( item['section'] == 'damagetaken' ) then
+        result = string.format(
+            EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH
             , item["gp_value"]
             , (GetSpellLink(item["spellid"]))
         )
