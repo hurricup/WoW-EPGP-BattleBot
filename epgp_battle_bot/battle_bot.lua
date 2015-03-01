@@ -13,15 +13,15 @@ local config_keys = {
     "damagetaken",
     "buff",
 };
--- /ebb add 150 on death by 156554 
--- /ebb add 150 on buff by 154960
--- /ebb add 50 on damagetaken by 157247 -- sound rings
--- /ebb add 50 on damagetaken by 158140 -- franzok
--- /ebb add 50 on damagetaken by 161570 -- matrac
--- /ebb add 150 on death by 156938 -- tank capture
--- /ebb add 150 on death by 154938 -- not shared meteor
--- /ebb add 50 on buff by 155314 -- cumshots from anvil
--- /ebb add 150 on buff by 154989 3 -- breath stacks
+-- /ebb add 150 on death by 156554       -- death by train
+-- /ebb add 150 on buff by 154960        -- stick on beastmaster
+-- /ebb add 50 on damagetaken by 157247  -- sound rings kromag
+-- /ebb add 50 on damagetaken by 158140  -- franzok
+-- /ebb add 50 on damagetaken by 161570  -- flame matrace
+-- /ebb add 150 on death by 156938       -- tank capture
+-- /ebb add 150 on death by 154938       -- not shared meteor
+-- /ebb add 50 on buff by 155314         -- cumshots from anvil
+-- /ebb add 150 on buff by 154989 3      -- breath stacks
 -- /ebb add 150 on damagetaken by 160050 -- burrowed bomb
 -- /ebb add 150 on damagetaken by 157659 -- kromogg cone
 -- /ebb add 150 on damagetaken by 161839 -- kromogg bad rune
@@ -332,10 +332,18 @@ end
 
 function battle_bot_register_events(self)
     self:RegisterEvent("VARIABLES_LOADED")
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+end
+
+function battle_bot_combatlog_parser(...)
+    local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ...
+    print(string.format('%s %s from %s to %s', spell_name, event, src_name, dst_name))
 end
 
 function battle_bot_event_handler(self, event, ...)
-    if( event == "VARIABLES_LOADED" ) then
+    if( event == "COMBAT_LOG_EVENT_UNFILTERED" ) then
+        battle_bot_combatlog_parser(...)
+    elseif( event == "VARIABLES_LOADED" ) then
         battle_bot_init()
     end
 end
