@@ -14,24 +14,24 @@ local config_keys = {
 };
 -- /ebb add 150 on death by 156554 Успел на поезд
 -- /ebb add 150 on buff by 154960 Приколист
+-- /ebb add 150 on buff by 154960 10
 function battle_bot_add_rule( section, item, gp_value)
     item["enabled"] = true
     item["section"] = section
     item["gp_value"] = gp_value
-    
-    item["comment"] = GetSpellInfo(item["spellid"])
 
     local found = false
-    
+
+    local announce  = ""
     for key, val in pairs( config[section] ) do
         if( val['spellid'] == item['spellid'] ) then
             local olditem = config[section][key]
             config[section][key] = item
-            print( string.format(
+            announce = string.format(
                 EPGP_BB_REPLACED_RULE
                 , battle_bot_get_rule_as_string(olditem)
                 , battle_bot_get_rule_as_string(item)
-            ))
+            )
             found = true
             break
         end
@@ -39,10 +39,18 @@ function battle_bot_add_rule( section, item, gp_value)
     
     if( not found ) then
         table.insert(config[section], item)
-        print( string.format(
+        announce = string.format(
             EPGP_BB_CREATED_RULE
             , battle_bot_get_rule_as_string(item)
-        ))
+        )
+    end
+    
+    if( announce ~= "" ) then
+        if( UnitInRaid('player') == nil ) then
+            print(announce)
+        else
+            SendChatMessage(announce, 'RAID')
+        end
     end
 end
 
@@ -61,7 +69,7 @@ function battle_bot_reset_handler()
 end
 
 function battle_bot_add_handler( cmd, tail )                           
-    gp_value, action_base, action_ext, actor = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
+    gp_value, action_base, action_ext, actor, tail = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
     if( 
         action_base == 'damagedone' 
         or action_base == 'death'
@@ -73,6 +81,13 @@ function battle_bot_add_handler( cmd, tail )
                 ['spellid'] = actor,
             }
             
+            if( action_base == 'buff' ) then
+                item["stacks"] = tonumber(tail)
+                if( item["stacks"] == nil ) then
+                    item["stacks"] = 1
+                end
+            end
+            
             battle_bot_add_rule( action_base, item, gp_value )
         else
             battle_bot_help_handler();
@@ -82,14 +97,6 @@ function battle_bot_add_handler( cmd, tail )
     end
 end
 
-function battle_bot_get_spell_link( item )
-    return string.format(
-        EPGP_BB_SPELL_LINK
-        , item["spellid"]
-        , item["comment"]
-    ) -- /ebb add 150 on death by 156554
-end
-
 function battle_bot_get_rule_as_string( item )
     local result
     
@@ -97,14 +104,23 @@ function battle_bot_get_rule_as_string( item )
         result = string.format(
             EPGP_BB_RULE_DEATH_BY_PH
             , item["gp_value"]
-            , battle_bot_get_spell_link(item)
+            , (GetSpellLink(item["spellid"]))
         )
     elseif( item['section'] == 'buff' ) then
-        result = string.format(
-            EPGP_BB_RULE_BUFF_BY_PH
-            , item["gp_value"]
-            , battle_bot_get_spell_link(item)
-        )
+        if( item['stacks'] > 1 ) then
+            result = string.format(
+                EPGP_BB_RULE_BUFF_STACKS_BY_PH
+                , item["gp_value"]
+                , item["stacks"]
+                , (GetSpellLink(item["spellid"]))
+            )
+        else
+            result = string.format(
+                EPGP_BB_RULE_BUFF_BY_PH
+                , item["gp_value"]
+                , (GetSpellLink(item["spellid"]))
+            )
+        end
     else
         print( "Don't know how to stringify rule: "..item['section'].."\n" )
         result = 'Unknown'
@@ -117,7 +133,7 @@ function battle_bot_get_rules_text()
     local result = {}
     local counter = 1
 
-    for _, subtable in pairs({'death', 'buff'}) do
+    for _, subtable in pairs(config_keys) do
         if( config[subtable] ) then
             for _, item in pairs(config[subtable]) do
                 is_enabled = EPGP_BB_DISABLED
