@@ -11,5 +11,6 @@
 ## X-Feedback: https://github.com/hurricup/WoW-EPGP-BattleBot/issues
 ## X-Localizations: enUS
 locale-en.lua
+locale-ru.lua
 battle_bot.lua
 battle_bot.xml

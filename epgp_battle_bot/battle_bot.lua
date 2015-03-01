@@ -6,6 +6,11 @@ local version = "6.1"
 -- @todo limitation of one hit
 -- @todo instant or periodic damage
 -- @todo geom control of rooms, void zones dropping?
+-- @todo all rules must be in one array, shortcuts should be structured
+-- @todo bonuses for top dps on mobs
+-- @todo should be character variables
+-- @todo check target type
+-- @todo check if can inc gp
 
 local config_keys = {
     "death",
@@ -13,6 +18,9 @@ local config_keys = {
     "damagetaken",
     "buff",
 };
+
+local active_rules = {}
+
 -- /ebb add 150 on death by 156554       -- death by train
 -- /ebb add 150 on buff by 154960        -- stick on beastmaster
 -- /ebb add 50 on damagetaken by 157247  -- sound rings kromag
@@ -28,6 +36,23 @@ local config_keys = {
 -- /ebb add 150 on damagetaken by 157884 -- bomb explosion
 -- /ebb add 150 on damagetaken by 160733 -- bomb landing
 -- /ebb add 150 on damagetaken by 176133 -- elem explosion
+
+-- /ebb add 1 on damagetaken by 35395
+function battle_bot_make_active_rules()
+    active_rules = {}
+    for _, subtable in pairs(config_keys) do
+        if( config[subtable] ) then
+            active_rules[subtable] = {}
+            for _, item in pairs(config[subtable]) do
+                if( item["enabled"] ) then
+                    active_rules[subtable][item["spellid"]] = item
+                end
+            end
+        end
+    end
+    config["activerules"] = nil
+end
+
 function battle_bot_add_rule( section, item, gp_value)
     item["enabled"] = true
     item["section"] = section
@@ -59,6 +84,7 @@ function battle_bot_add_rule( section, item, gp_value)
     end
 
     battle_bot_smart_announce(announce)
+    battle_bot_make_active_rules()
 end
 
 function battle_bot_smart_announce(announce)
@@ -258,6 +284,7 @@ function battle_bot_del_handler( cmd, tail )
         ))
         battle_bot_list_handler();
     end
+    battle_bot_make_active_rules()
 end
 
 function battle_bot_enable_handler( cmd, tail )
@@ -271,6 +298,7 @@ function battle_bot_enable_handler( cmd, tail )
         ))
         battle_bot_list_handler();
     end
+    battle_bot_make_active_rules()
 end
 
 function battle_bot_disable_handler( cmd, tail )
@@ -284,6 +312,7 @@ function battle_bot_disable_handler( cmd, tail )
         ))
         battle_bot_list_handler();
     end
+    battle_bot_make_active_rules()
 end
 
 function battle_bot_help_handler()
@@ -318,7 +347,7 @@ function battle_bot_validate_config()
     end
 
     battle_bot_check_config_keys()
- 
+    battle_bot_make_active_rules()
 end
 
 function battle_bot_init()
@@ -335,9 +364,55 @@ function battle_bot_register_events(self)
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
+-- /ebb add 1 on buff by 19740
 function battle_bot_combatlog_parser(...)
-    local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ...
-    print(string.format('%s %s from %s to %s', spell_name, event, src_name, dst_name))
+    local arg = {...}
+    local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ... -- 14 items
+    
+    if( event == "SPELL_AURA_APPLIED" ) then
+        local rule = active_rules["buff"][spell_id..""]
+   
+        if( rule ~= nil and rule["stacks"] == 1 ) then
+            EPGP:IncGPBy(
+                dst_name
+                , battle_bot_get_rule_as_string(rule)
+                , tonumber(rule["gp_value"])
+            )
+        end
+    elseif( event == "SPELL_AURA_APPLIED_DOSE" ) then
+        local rule = active_rules["buff"][spell_id..""]
+   
+        if( rule ~= nil and rule["stacks"] > 1 ) then
+
+            local stacks = tonumber(arg[16])
+
+            if( stacks ~= nil and stacks >= rule["stacks"] ) then
+                EPGP:IncGPBy(
+                    dst_name
+                    , battle_bot_get_rule_as_string(rule)
+                    , tonumber(rule["gp_value"])
+                )
+            end
+        end
+    elseif( event == "SPELL_DAMAGE" ) then
+        local death_rule = active_rules["death"][spell_id..""]
+        local damagetaken_rule = active_rules["damagetaken"][spell_id..""]
+
+        if( death_rule ~= nil and tonumber(args[16]) > 0 ) then
+            EPGP:IncGPBy(
+                dst_name
+                , battle_bot_get_rule_as_string(death_rule)
+                , tonumber(death_rule["gp_value"])
+            )
+        elseif( damagetaken_rule ~= nil ) then
+            EPGP:IncGPBy(
+                dst_name
+                , battle_bot_get_rule_as_string(damagetaken_rule)
+                , tonumber(damagetaken_rule["gp_value"])
+            )
+        end
+    end
+    
 end
 
 function battle_bot_event_handler(self, event, ...)
