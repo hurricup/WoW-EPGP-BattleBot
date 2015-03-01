@@ -200,8 +200,44 @@ function battle_bot_announce_handler( cmd, tail )
     end
 end
 
+function battle_bot_get_rule_by_number(counter)
+    local index = tonumber(tail)
+    local counter = 1
+    
+    if( index ~= nil ) then
+        for _, subtable in pairs(config_keys) do
+            if( config[subtable] ) then
+                for key, item in pairs(config[subtable]) do
+                    if( counter == index ) then
+                        return subtable, key
+                    else
+                        counter = counter + 1
+                    end    
+                end
+            end
+        end
+    end
+end
+
 function battle_bot_del_handler( cmd, tail )
-    print( cmd, tail);
+
+    if( tail == nil ) then
+        tail = ""
+    end
+
+    local subtable, key = battle_bot_get_rule_by_number(tail)
+   
+    if( key ~= nil ) then
+        local item = config[subtable][key]
+        config[subtable][key] = nil
+        battle_bot_smart_announce(string.format(
+            EPGP_BB_RULE_DELETED
+            , battle_bot_get_rule_as_string(item)
+        ))
+    else
+        print( string.format( EPGP_BB_RULE_NOT_FOUND, tail ))
+    end
+    battle_bot_list_handler();
 end
 
 function battle_bot_enable_handler( cmd, tail )
