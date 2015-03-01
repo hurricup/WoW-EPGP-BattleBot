@@ -11,6 +11,9 @@ local version = "6.1"
 -- @todo should be character variables
 -- @todo check target type
 -- @todo check if can inc gp
+-- @todo pre-potions
+
+local is_enabled = true
 
 local config_keys = {
     "death",
@@ -319,6 +322,18 @@ function battle_bot_help_handler()
     print(EPGP_BB_HELP:format(version))
 end
 
+function battle_bot_turn_on_handler()
+    print("Enabled")
+    is_enabled = true
+    LoggingCombat(true)
+end
+
+function battle_bot_turn_off_handler()
+    print("Disabled")
+    is_enabled = false
+    LoggingCombat(false)
+end
+
 local slash_handlers = {
     list     = battle_bot_list_handler,
     add      = battle_bot_add_handler,
@@ -327,12 +342,14 @@ local slash_handlers = {
     disable  = battle_bot_disable_handler,
     reset    = battle_bot_reset_handler,
     announce = battle_bot_announce_handler,
+    on       = battle_bot_turn_on_handler,
+    off      = battle_bot_turn_off_handler,
 }
 
 function battle_bot_slash_handler( msg, box)
     msg = string.lower(msg)
 
-    _, _, cmd, tail = string.find( msg, '^%s*(%a+)%s*(.*)$');
+    cmd, tail = string.match( msg, '^%s*(%a+)%s*(.*)$');
     
     if( slash_handlers[cmd] ) then
         slash_handlers[cmd](cmd, tail)
@@ -366,6 +383,11 @@ end
 
 -- /ebb add 1 on buff by 19740
 function battle_bot_combatlog_parser(...)
+
+    if( not is_enabled ) then
+        return
+    end
+
     local arg = {...}
     local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ... -- 14 items
     
@@ -373,11 +395,13 @@ function battle_bot_combatlog_parser(...)
         local rule = active_rules["buff"][spell_id..""]
    
         if( rule ~= nil and rule["stacks"] == 1 ) then
-            EPGP:IncGPBy(
-                dst_name
-                , battle_bot_get_rule_as_string(rule)
-                , tonumber(rule["gp_value"])
-            )
+            local reason = battle_bot_get_rule_as_string(rule)
+            local amount = tonumber(rule["gp_value"])
+            if( EPGP:CanIncGPBy(reason, amount) ) then
+                EPGP:IncGPBy( dst_name, reason, amount )
+            else
+                print("unable to give", dst_name, reason, amount)
+            end
         end
     elseif( event == "SPELL_AURA_APPLIED_DOSE" ) then
         local rule = active_rules["buff"][spell_id..""]
@@ -387,29 +411,35 @@ function battle_bot_combatlog_parser(...)
             local stacks = tonumber(arg[16])
 
             if( stacks ~= nil and stacks >= rule["stacks"] ) then
-                EPGP:IncGPBy(
-                    dst_name
-                    , battle_bot_get_rule_as_string(rule)
-                    , tonumber(rule["gp_value"])
-                )
+                local reason = battle_bot_get_rule_as_string(rule)
+                local amount = tonumber(rule["gp_value"])
+               if( EPGP:CanIncGPBy(reason, amount) ) then
+                    EPGP:IncGPBy( dst_name, reason, amount )
+                else
+                    print("unable to give", dst_name, reason, amount)
+                end
             end
         end
     elseif( event == "SPELL_DAMAGE" ) then
         local death_rule = active_rules["death"][spell_id..""]
         local damagetaken_rule = active_rules["damagetaken"][spell_id..""]
 
-        if( death_rule ~= nil and tonumber(args[16]) > 0 ) then
-            EPGP:IncGPBy(
-                dst_name
-                , battle_bot_get_rule_as_string(death_rule)
-                , tonumber(death_rule["gp_value"])
-            )
-        elseif( damagetaken_rule ~= nil ) then
-            EPGP:IncGPBy(
-                dst_name
-                , battle_bot_get_rule_as_string(damagetaken_rule)
-                , tonumber(damagetaken_rule["gp_value"])
-            )
+        if( death_rule ~= nil and tonumber(arg[16]) > 0 ) then
+            local reason = battle_bot_get_rule_as_string(death_rule)
+            local amount = tonumber(death_rule["gp_value"])
+            if( EPGP:CanIncGPBy(reason, amount) ) then
+                EPGP:IncGPBy( dst_name, reason, amount )
+            else
+                print("unable to give", dst_name, reason, amount)
+            end
+        elseif( damagetaken_rule ~= nil ) then -- 
+            local reason = battle_bot_get_rule_as_string(damagetaken_rule)
+            local amount = tonumber(damagetaken_rule["gp_value"])
+           if( EPGP:CanIncGPBy(reason, amount) ) then
+                EPGP:IncGPBy( dst_name, reason, amount )
+            else
+                print("unable to give", dst_name, reason, amount)
+            end
         end
     end
     
