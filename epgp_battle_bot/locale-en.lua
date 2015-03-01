@@ -5,7 +5,7 @@ EPGP_BB_HELP = "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /e
     .."   /ebb add GP_value on event - add new rule to charge GP on event. Events are:\n"
     .."       death by spell_id - charge GP on taking damage with overkill from spell by id\n"
     .."       damagetaken by spell_id - charge GP on taking damage from spell by id\n"
-    .."       buff spell_id [stacks min_staks] - charge GP to players, gathered min_staks of buff/debuff (NYI)\n"
+    .."       buff spell_id [stacks min_staks] - charge GP to players, gathered min_staks of buff/debuff\n"
     .."   /ebb del rule_id - delete rule by id\n"
     .."   /ebb enable rule_id - enable rule by id\n"
     .."   /ebb disable rule_id - disable rule by id\n"

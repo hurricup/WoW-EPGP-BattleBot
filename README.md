@@ -20,7 +20,7 @@ Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
 * `/ebb add GP_value on event` - add new rule to charge GP on event. Events are:
   * `death by spell_id` - charge GP on taking damage with overkill from spell by id
   * `damage by spell_id` - charge GP on taking damage from spell by id
-  * `buff spell_id [stacks min_staks]` - charge GP to players, gathered min_staks of buff/debuff (NYI)
+  * `buff spell_id [stacks min_staks]` - charge GP to players, gathered min_staks of buff/debuff
 * `/ebb del rule_id` - delete rule by id
 * `/ebb enable rule_id` - enable rule by id
 * `/ebb disable rule_id` - disable rule by id
