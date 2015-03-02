@@ -12,6 +12,8 @@ EPGP_BB_HELP = "WowRaider.Net EPGP Battle Bot %s.\nКоманды настрой
     .."   /ebb enable rule_id - включить правило по id\n"
     .."   /ebb disable rule_id - выключить правило по id\n"
     .."   /ebb reset - сбросить настройки, удалть все правила\n"
+    .."   /ebb on - включить отслеживание, включить запись комбатлога, удобно использовать в макросе на пулл\n"
+    .."   /ebb off - отключает мониторинг, останавливает запись комбатлога, удобно использовать в макросе на вайп.\n"
 EPGP_BB_CONFIG_RESET = "Конфигурация сброшена\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
 EPGP_BB_RULE_DEATH_BY_PH = "%d GP за смерть от %s"
