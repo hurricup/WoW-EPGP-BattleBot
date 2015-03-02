@@ -12,8 +12,13 @@ local version = "6.1"
 -- @todo check target type
 -- @todo check if can inc gp
 -- @todo pre-potions
+-- @todo penaltiers history
+-- @todo CanEditOfficerNote
+-- @todo channeling heals should disable penalties
 
 local is_enabled = true
+local queue = {}
+local GS = LibStub("LibGuildStorage-1.2")
 
 local config_keys = {
     "death",
@@ -323,13 +328,13 @@ function battle_bot_help_handler()
 end
 
 function battle_bot_turn_on_handler()
-    print("Enabled")
+    battle_bot_smart_announce(EPGP_BB_ADDON_ENABLED)
     is_enabled = true
     LoggingCombat(true)
 end
 
 function battle_bot_turn_off_handler()
-    print("Disabled")
+    battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
     is_enabled = false
     LoggingCombat(false)
 end
@@ -391,33 +396,24 @@ function battle_bot_combatlog_parser(...)
     local arg = {...}
     local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ... -- 14 items
     
+    local reason = nil
+    local amount = nil
+    
     if( event == "SPELL_AURA_APPLIED" ) then
         local rule = active_rules["buff"][spell_id..""]
    
         if( rule ~= nil and rule["stacks"] == 1 ) then
-            local reason = battle_bot_get_rule_as_string(rule)
-            local amount = tonumber(rule["gp_value"])
-            if( EPGP:CanIncGPBy(reason, amount) ) then
-                EPGP:IncGPBy( dst_name, reason, amount )
-            else
-                print("unable to give", dst_name, reason, amount)
-            end
+            reason = battle_bot_get_rule_as_string(rule)
+            amount = rule["gp_value"]
         end
     elseif( event == "SPELL_AURA_APPLIED_DOSE" ) then
         local rule = active_rules["buff"][spell_id..""]
    
         if( rule ~= nil and rule["stacks"] > 1 ) then
-
             local stacks = tonumber(arg[16])
-
             if( stacks ~= nil and stacks >= rule["stacks"] ) then
-                local reason = battle_bot_get_rule_as_string(rule)
-                local amount = tonumber(rule["gp_value"])
-               if( EPGP:CanIncGPBy(reason, amount) ) then
-                    EPGP:IncGPBy( dst_name, reason, amount )
-                else
-                    print("unable to give", dst_name, reason, amount)
-                end
+                reason = battle_bot_get_rule_as_string(rule)
+                amount = rule["gp_value"]
             end
         end
     elseif( event == "SPELL_DAMAGE" ) then
@@ -425,24 +421,40 @@ function battle_bot_combatlog_parser(...)
         local damagetaken_rule = active_rules["damagetaken"][spell_id..""]
 
         if( death_rule ~= nil and tonumber(arg[16]) > 0 ) then
-            local reason = battle_bot_get_rule_as_string(death_rule)
-            local amount = tonumber(death_rule["gp_value"])
-            if( EPGP:CanIncGPBy(reason, amount) ) then
-                EPGP:IncGPBy( dst_name, reason, amount )
-            else
-                print("unable to give", dst_name, reason, amount)
-            end
+            reason = battle_bot_get_rule_as_string(death_rule)
+            amount = death_rule["gp_value"]
         elseif( damagetaken_rule ~= nil ) then -- 
-            local reason = battle_bot_get_rule_as_string(damagetaken_rule)
-            local amount = tonumber(damagetaken_rule["gp_value"])
-           if( EPGP:CanIncGPBy(reason, amount) ) then
-                EPGP:IncGPBy( dst_name, reason, amount )
-            else
-                print("unable to give", dst_name, reason, amount)
-            end
+            reason = battle_bot_get_rule_as_string(damagetaken_rule)
+            amount = damagetaken_rule["gp_value"]
         end
     end
-    
+
+    -- push to queue
+    if( 
+        amount ~= nil 
+        and reason ~= nil 
+    ) then
+        table.insert(queue, {
+            ["name"] = dst_name,
+            ["reason"] = reason,
+            ["amount"] = tonumber(amount)
+        })
+    end
+
+    -- proceed the queue
+    if( 
+        table.getn(queue) > 0 
+        and GS:IsCurrentState()
+    ) then -- we need to check permissions
+        local item = table.remove(queue, 1);
+        
+        if( EPGP:CanIncGPBy(item["reason"], item["amount"]) ) then
+            EPGP:IncGPBy( item["name"], item["reason"], item["amount"] )
+        else
+            print("Unabe to charge GP", item["name"], item["reason"], item["amount"])
+        end
+    end
+   
 end
 
 function battle_bot_event_handler(self, event, ...)
