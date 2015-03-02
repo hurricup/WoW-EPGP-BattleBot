@@ -15,6 +15,7 @@ local version = "6.1"
 -- @todo penaltiers history
 -- @todo CanEditOfficerNote
 -- @todo channeling heals should disable penalties
+-- @meditation
 
 local is_enabled = true
 local queue = {}
@@ -328,15 +329,15 @@ function battle_bot_help_handler()
 end
 
 function battle_bot_turn_on_handler()
-    battle_bot_smart_announce(EPGP_BB_ADDON_ENABLED)
     is_enabled = true
     LoggingCombat(true)
+    battle_bot_smart_announce(EPGP_BB_ADDON_ENABLED)
 end
 
 function battle_bot_turn_off_handler()
-    battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
     is_enabled = false
     LoggingCombat(false)
+    battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
 end
 
 local slash_handlers = {
