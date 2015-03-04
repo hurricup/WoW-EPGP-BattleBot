@@ -1,22 +1,5 @@
 local version = "6.1"
 
--- @todo rulesets
--- @todo exclude tanks (bleeds on darmak)
--- @todo interupters penalties
--- @todo limitation of one hit
--- @todo instant or periodic damage
--- @todo geom control of rooms, void zones dropping?
--- @todo all rules must be in one array, shortcuts should be structured
--- @todo bonuses for top dps on mobs
--- @todo should be character variables
--- @todo check target type
--- @todo check if can inc gp
--- @todo pre-potions
--- @todo penaltiers history
--- @todo CanEditOfficerNote
--- @todo channeling heals should disable penalties
--- @meditation
-
 local is_enabled = true
 local queue = {}
 local GS = LibStub("LibGuildStorage-1.2")
@@ -30,23 +13,6 @@ local config_keys = {
 
 local active_rules = {}
 
--- /ebb add 150 on death by 156554       -- death by train
--- /ebb add 150 on buff by 154960        -- stick on beastmaster
--- /ebb add 50 on damagetaken by 157247  -- sound rings kromag
--- /ebb add 50 on damagetaken by 158140  -- franzok
--- /ebb add 50 on damagetaken by 161570  -- flame matrace
--- /ebb add 150 on death by 156938       -- tank capture
--- /ebb add 150 on death by 154938       -- not shared meteor
--- /ebb add 50 on buff by 155314         -- cumshots from anvil
--- /ebb add 150 on buff by 154989 3      -- breath stacks
--- /ebb add 150 on damagetaken by 160050 -- burrowed bomb
--- /ebb add 150 on damagetaken by 157659 -- kromogg cone
--- /ebb add 150 on damagetaken by 161839 -- kromogg bad rune
--- /ebb add 150 on damagetaken by 157884 -- bomb explosion
--- /ebb add 150 on damagetaken by 160733 -- bomb landing
--- /ebb add 150 on damagetaken by 176133 -- elem explosion
-
--- /ebb add 1 on damagetaken by 35395
 function battle_bot_make_active_rules()
     active_rules = {}
     for _, subtable in pairs(config_keys) do
