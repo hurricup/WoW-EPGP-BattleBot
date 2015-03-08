@@ -1,6 +1,6 @@
 EPGP_BB_HELP = {
     "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /ebb commands. Options list:",
-    "  /ebb help - display configuration help",
+    "  /ebb help - display configuration help (NYI)",
     "  /ebb status - displays current addon settings",
     "  /ebb announce (say|guild|raid|party) - announce active rules to the specific channel (raid by default, say if not in raid)",
     "  /ebb list - display the list of current rules",
@@ -15,7 +15,7 @@ EPGP_BB_HELP = {
     "  /ebb enable rule_id - enable rule by id",
     "  /ebb disable rule_id - disable rule by id",
     "  /ebb reset - reset configuraion, delete all rules",
-    "  /ebb autologging on|off - enables or disables automatic combatlogging on on/off command",
+    "  /ebb autologging (on|off) - enables or disables automatic combatlogging on on/off command",
     "  /ebb on - enables monitoring, start combat logging, put this in pull macro",
     "  /ebb off - disables monitoring, stops combat logging, put this in wipe macro",
 }
@@ -45,3 +45,5 @@ EPGP_BB_ADDON_DISABLED = "EPGP Battle Bot disabled, relax"
 EPGP_BB_LOGGING_ENABLED = "Combatlog recording turned on"
 EPGP_BB_LOGGING_DISABLED = "Combatlog recording turned off"
 
+EPGP_BB_AUTOLOGGING_ENABLED = "Automatic combatlogging control enabled"
+EPGP_BB_AUTOLOGGING_DISABLED = "Automatic combatlogging control disabled"

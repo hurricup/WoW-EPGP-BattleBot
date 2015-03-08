@@ -247,6 +247,7 @@ end
 
 
 function battle_bot_del_handler( cmd, tail )
+    local old_tail = tail
     tail = tonumber(tail)
     if( rules[tail] ~= nil ) then
         local rule = table.remove(rules, tail)
@@ -256,13 +257,14 @@ function battle_bot_del_handler( cmd, tail )
         ))
         battle_bot_make_active_rules()
     else
-        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, old_tail))
     end
     battle_bot_list_handler();
 end
 
 
 function battle_bot_enable_handler( cmd, tail )
+    local old_tail = tail
     tail = tonumber(tail)
     if( rules[tail] ~= nil ) then
         rules[tail]["enabled"] = true
@@ -272,13 +274,14 @@ function battle_bot_enable_handler( cmd, tail )
         ))
         battle_bot_make_active_rules()
     else
-        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, old_tail))
         battle_bot_list_handler();
     end
 end
 
 
 function battle_bot_disable_handler( cmd, tail )
+    local old_tail = tail
     tail = tonumber(tail)
     if( rules[tail] ~= nil ) then
         rules[tail]["enabled"] = false
@@ -288,7 +291,7 @@ function battle_bot_disable_handler( cmd, tail )
         ))
         battle_bot_make_active_rules()
     else
-        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, old_tail))
         battle_bot_list_handler();
     end
 end
@@ -320,6 +323,17 @@ function battle_bot_turn_off_handler()
     battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
 end
 
+function battle_bot_autologging_handler(cmd,tail)
+    if( string.lower(tail) == 'on' ) then
+        player_config['autologging'] = true
+        print(EPGP_BB_AUTOLOGGING_ENABLED)
+    elseif( string.lower(tail) == 'off' ) then
+        player_config['autologging'] = false
+        print(EPGP_BB_AUTOLOGGING_DISABLED)
+    else
+        battle_bot_help_handler()
+    end
+end
 
 local slash_handlers = {
     status      = battle_bot_status_handler,
