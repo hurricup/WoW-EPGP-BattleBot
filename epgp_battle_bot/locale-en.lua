@@ -1,21 +1,25 @@
-EPGP_BB_HELP = "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /ebb commands. Options list:\n"
-    .."   /ebb help - display configuration help\n"
-    .."   /ebb announce say|guild|raid|party - announce active rules to the specific channel (raid by default)\n"
-    .."   /ebb list - display the list of current rules\n"
-    .."   /ebb add GP_value on event - add new rule to charge GP on event. Events are:\n"
-    .."       death by spell_id - charge GP on taking damage with overkill from spell by id\n"
-    .."       damagetaken by spell_id - charge GP on taking damage from spell by id\n"
-    .."       buff spell_id [min_staks] - charge GP to players, gained min_staks of buff/debuff, 1 by default\n"
-    .."   /ebb del rule_id - delete rule by id\n"
-    .."   /ebb enable rule_id - enable rule by id\n"
-    .."   /ebb disable rule_id - disable rule by id\n"
-    .."   /ebb reset - reset configuraion, delete all rules\n"
-    .."   /ebb on - enables monitoring, start combat logging, put this in pull macro\n"
-    .."   /ebb off - disables monitoring, stops combat logging, put this in wipe macro\n"
+EPGP_BB_HELP = {
+    "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /ebb commands. Options list:",
+    "   /ebb help - display configuration help",
+    "   /ebb announce say|guild|raid|party - announce active rules to the specific channel (raid by default)",
+    "   /ebb list - display the list of current rules",
+    "   /ebb add GP_value on event - add new rule to charge GP on event. Events are:",
+    "       death by spell_id - charge GP on taking damage with overkill from spell by id",
+    "       damagetaken by spell_id - charge GP on taking damage from spell by id",
+    "       buff spell_id [min_staks] - charge GP to players, gained min_staks of buff/debuff, 1 by default",
+    "   /ebb del rule_id - delete rule by id",
+    "   /ebb enable rule_id - enable rule by id",
+    "   /ebb disable rule_id - disable rule by id",
+    "   /ebb reset - reset configuraion, delete all rules",
+    "   /ebb on - enables monitoring, start combat logging, put this in pull macro",
+    "   /ebb off - disables monitoring, stops combat logging, put this in wipe macro",
+}
 EPGP_BB_CONFIG_RESET = "Configuration has been reset\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
 EPGP_BB_RULE_DEATH_BY_PH = "%d GP for death from %s"
 EPGP_BB_RULE_BUFF_BY_PH = "%d GP for gaining buff %s"
+EPGP_BB_RULE_PROTECT_CAST_PH = "immune to damage penalties while casting %s"
+EPGP_BB_RULE_PROTECT_BUFF_PH = "immune to damage penalties with buff %s"
 EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP for taking damage from %s"
 EPGP_BB_ACTIVE_RULES_HEADER = "List of active penalties:"
 EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d GP for gaining %d stacks of the buff %s"

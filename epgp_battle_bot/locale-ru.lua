@@ -1,26 +1,30 @@
 if GetLocale() ~= "ruRU" then return end
 
-EPGP_BB_HELP = "WowRaider.Net EPGP Battle Bot %s.\nКоманды настройки /epgpbb или /ebb. Список опций:\n"
-    .."   /ebb help - показать помощь\n"
-    .."   /ebb announce say|guild|raid|party - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд)\n"
-    .."   /ebb list - показать список существующих правил\n"
-    .."   /ebb add GP_value on event - добавить новое правило начисления GP при событии. Доступные события:\n"
-    .."       death by spell_id - начислить GP при получении избыточного урона от способности по ее id\n"
-    .."       damagetaken by spell_id - начислить GP при получении урона от способности по ее id\n"
-    .."       buff spell_id [min_staks] - начислить GP игрокам, получившим min_staks стаков баффа/дебаффа. 1 по умолчанию\n"
-    .."   /ebb del rule_id - удалить правило по id\n"
-    .."   /ebb enable rule_id - включить правило по id\n"
-    .."   /ebb disable rule_id - выключить правило по id\n"
-    .."   /ebb reset - сбросить настройки, удалть все правила\n"
-    .."   /ebb on - включить отслеживание, включить запись комбатлога, удобно использовать в макросе на пулл\n"
-    .."   /ebb off - отключает мониторинг, останавливает запись комбатлога, удобно использовать в макросе на вайп.\n"
+EPGP_BB_HELP = {
+    "WowRaider.Net EPGP Battle Bot %s.\nКоманды настройки /epgpbb или /ebb. Список опций:",
+    "   /ebb help - показать помощь",
+    "   /ebb announce say|guild|raid|party - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд)",
+    "   /ebb list - показать список существующих правил",
+    "   /ebb add GP_value on event - добавить новое правило начисления GP при событии. Доступные события:",
+    "       death by spell_id - получение избыточного урона от способности по ее id",
+    "       damagetaken by spell_id - получение урона от способности по ее id",
+    "       buff spell_id [min_staks] - получение min_staks стаков баффа/дебаффа. 1 по умолчанию",
+    "   /ebb del rule_id - удалить правило по id",
+    "   /ebb enable rule_id - включить правило по id",
+    "   /ebb disable rule_id - выключить правило по id",
+    "   /ebb reset - сбросить настройки, удалть все правила",
+    "   /ebb on - включить отслеживание, включить запись комбатлога, удобно использовать в макросе на пулл",
+    "   /ebb off - отключает мониторинг, останавливает запись комбатлога, удобно использовать в макросе на вайп.",
+}
 EPGP_BB_CONFIG_RESET = "Конфигурация сброшена\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
 EPGP_BB_RULE_DEATH_BY_PH = "%d GP за смерть от %s"
 EPGP_BB_RULE_BUFF_BY_PH = "%d GP за получение баффа %s"
-EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP за получение урона от %s"
 EPGP_BB_ACTIVE_RULES_HEADER = "Список действующих штрафов:"
+EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP за получение урона от %s"
 EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d GP за получение %d стаков бафа %s"
+EPGP_BB_RULE_PROTECT_CAST_PH = "иммунитет к штрафам за урон во время чтения заклинания %s"
+EPGP_BB_RULE_PROTECT_BUFF_PH = "иммунитет к штрафам за урон с баффом %s"
 EPGP_BB_RULE_DELETED = "Удалено правило: %s"
 EPGP_BB_RULE_NOT_FOUND = "Ошибка. Не могу найти правило %s. Список существующих правил:"
 EPGP_BB_RULE_ENABLED = "Включено правило: %s"
