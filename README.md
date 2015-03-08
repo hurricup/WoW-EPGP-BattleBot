@@ -11,7 +11,7 @@ This addon works only with [epgp addon](http://www.curse.com/addons/wow/epgp-dkp
 Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
 
 * `/ebb help` - display configuration help 
-* `/ebb status` - display addon settings (NYI)
+* `/ebb status` - display addon settings
 * `/ebb announce (say|guild|raid|party)` - announce active rules to a channel. Raid by default, or say if player is not in raid
 * `/ebb list` - list of current configuration and rules
 * `/ebb add value (GP|EP) on event` - add new rule to charge GP or EP on event. Negative values supported. Events are:

@@ -183,14 +183,11 @@ function battle_bot_get_rules_text()
     for _, item in pairs(rules) do
         local newitem = {
             ["enabled"] = item["enabled"],
-            ["enabled_text"] = EPGP_BB_DISABLED,
+            ["enabled_text"] = EPGP_BB_STATE[item["enabled"]],
             ["counter"] = counter,
             ["rule"] = battle_bot_get_rule_as_string(item),
+            
         }
-        
-        if( item["enabled"] ) then
-            newitem["enabled_text"] = EPGP_BB_ENABLED
-        end
 
         table.insert( result, newitem )
         
@@ -333,6 +330,18 @@ function battle_bot_autologging_handler(cmd,tail)
     else
         battle_bot_help_handler()
     end
+end
+
+function battle_bot_reset_handler()
+    player_config["rules"] = {}
+    print(EPGP_BB_CONFIG_RESET)
+end
+
+function battle_bot_status_handler()
+    print(string.format(EPGP_BB_STATUS_VERSION, version))
+    print(string.format(EPGP_BB_STATUS_STATUS, EPGP_BB_STATE[player_config["enabled"]]))
+    print(string.format(EPGP_BB_STATUS_AUTOLOGGING, EPGP_BB_STATE[player_config["autologging"]]))
+    print(string.format(EPGP_BB_STATUS_RULES, table.getn(rules)))
 end
 
 local slash_handlers = {
@@ -481,10 +490,6 @@ function battle_bot_combatlog_parser(...)
    
 end
 
-function battle_bot_reset_handler()
-    player_config["rules"] = {}
-    print(EPGP_BB_CONFIG_RESET)
-end
 
 -- legacy, this function should be removed in release or two
 function battle_bot_make_active_rules()

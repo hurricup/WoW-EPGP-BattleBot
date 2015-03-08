@@ -1,9 +1,14 @@
 if GetLocale() ~= "ruRU" then return end
 
+EPGP_BB_STATUS_VERSION = "WowRaider.Net EPGP Battle Bot %s."
+EPGP_BB_STATUS_STATUS = "  Отслеживание событий: %s"
+EPGP_BB_STATUS_AUTOLOGGING = "  Автоматическая запись комбатлога: %s"
+EPGP_BB_STATUS_RULES = "  Добавлено правил: %s (введите /ebb list для просмотра)"
+
 EPGP_BB_HELP = {
-    "WowRaider.Net EPGP Battle Bot %s.\nКоманды настройки /epgpbb или /ebb. Список опций:",
+    EPGP_BB_STATUS_VERSION.."\nКоманды настройки /epgpbb или /ebb. Список опций:",
     "  /ebb help - показать помощь",
-    "  /ebb status - показать текущие настройки аддона (NYI)",
+    "  /ebb status - показать текущие настройки аддона",
     "  /ebb announce (say|guild|raid|party) - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд или в say, если игрок не в рейде)",
     "  /ebb list - показать список существующих правил",
     "  /ebb add value (EP|GP) on event - добавить новое правило начисления EP или GP при событии. Поддерживаются отрицательные числа. Доступные события:",
@@ -37,8 +42,10 @@ EPGP_BB_RULE_NOT_FOUND = "Ошибка. Не могу найти правило 
 EPGP_BB_RULE_ENABLED = "Включено правило: %s"
 EPGP_BB_RULE_DISABLED = "Выключено правило: %s"
 EPGP_BB_RULE_DELETED = "Удалено правило: %s"
-EPGP_BB_ENABLED = "включено"
-EPGP_BB_DISABLED = "выключено"
+EPGP_BB_STATE = {
+    [true] = "включено",
+    [false] = "выключено",
+}
 EPGP_BB_SPELL_LINK = "|cff71d5ff|Hspell:%d|h[%s]|h|r"
 EPGP_BB_CREATED_RULE = "Создано правило: %s"
 EPGP_BB_REPLACED_RULE = "Замена правила: '%s' на '%s'"

@@ -1,6 +1,11 @@
+EPGP_BB_STATUS_VERSION = "WowRaider.Net EPGP Battle Bot %s."
+EPGP_BB_STATUS_STATUS = "  Events monitoring: %s"
+EPGP_BB_STATUS_AUTOLOGGING = "  Automatic combatlogging: %s"
+EPGP_BB_STATUS_RULES = "  There are %s rules (type /ebb list to list them)"
+
 EPGP_BB_HELP = {
-    "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /ebb commands. Options list:",
-    "  /ebb help - display configuration help (NYI)",
+    EPGP_BB_STATUS_VERSION.."\nConfigurable by /epgpbb or /ebb commands. Options list:",
+    "  /ebb help - display configuration help",
     "  /ebb status - displays current addon settings",
     "  /ebb announce (say|guild|raid|party) - announce active rules to the specific channel (raid by default, say if not in raid)",
     "  /ebb list - display the list of current rules",
@@ -19,6 +24,7 @@ EPGP_BB_HELP = {
     "  /ebb on - enables monitoring, start combat logging, put this in pull macro",
     "  /ebb off - disables monitoring, stops combat logging, put this in wipe macro",
 }
+
 EPGP_BB_CONFIG_RESET = "Configuration has been reset\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
 
@@ -35,8 +41,10 @@ EPGP_BB_RULE_NOT_FOUND = "Error: unable to find rule %s. Here is the list of ava
 EPGP_BB_RULE_ENABLED = "Enabled rule: %s"
 EPGP_BB_RULE_DISABLED = "Disabled rule: %s"
 EPGP_BB_RULE_DELETED = "Deleted rule: %s"
-EPGP_BB_ENABLED = "enabled"
-EPGP_BB_DISABLED = "disabled"
+EPGP_BB_STATE = {
+    [true] = "enabled",
+    [false] = "disabled",
+}
 EPGP_BB_SPELL_LINK = "|cff71d5ff|Hspell:%d|h[%s]|h|r"
 EPGP_BB_CREATED_RULE = "Created rule: %s"
 EPGP_BB_REPLACED_RULE = "Replaced rule: '%s' with '%s'"
