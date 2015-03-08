@@ -350,16 +350,18 @@ function battle_bot_turn_off_handler()
 end
 
 local slash_handlers = {
-    list     = battle_bot_list_handler,
-    add      = battle_bot_add_handler,
-    protect  = battle_bot_protect_handler,
-    del      = battle_bot_del_handler,
-    enable   = battle_bot_enable_handler,
-    disable  = battle_bot_disable_handler,
-    reset    = battle_bot_reset_handler,
-    announce = battle_bot_announce_handler,
-    on       = battle_bot_turn_on_handler,
-    off      = battle_bot_turn_off_handler,
+    status      = battle_bot_status_handler,
+    autologging = battle_bot_autologging_handler,
+    list        = battle_bot_list_handler,
+    add         = battle_bot_add_handler,
+    protect     = battle_bot_protect_handler,
+    del         = battle_bot_del_handler,
+    enable      = battle_bot_enable_handler,
+    disable     = battle_bot_disable_handler,
+    reset       = battle_bot_reset_handler,
+    announce    = battle_bot_announce_handler,
+    on          = battle_bot_turn_on_handler,
+    off         = battle_bot_turn_off_handler,
 }
 
 function battle_bot_slash_handler( msg, box)

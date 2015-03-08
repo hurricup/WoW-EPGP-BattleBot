@@ -12,20 +12,21 @@ Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
 
 * `/ebb help` - display configuration help 
 * `/ebb announce [say|guild|raid|party]` - announce active rules to a channel. Raid by default
-* `/ebb list` - list of current configuration
+* `/ebb list` - list of current configuration and rules
 * `/ebb add GP_value on event` - add new rule to charge GP on event. Events are:
   * `death by spell_id` - taking damage with overkill from spell by id
   * `damagetaken by spell_id` - taking damage from spell by id
   * `buff by spell_id [min_stacks]` - gaining min_stacks of buff/debuff. 1 by default
-* `/ebb protect by` - protect from damagetaken penalties by conditions:
+* `/ebb protect from [penalty_class] by` - protect from penalties of penalty_class by conditions:
   * `cast spell_id` - casting spell with spell_id (long important heals)
   * `buff spell_id` - having buff with spell_id (anti-magic shell)
 * `/ebb del rule_id` - delete rule by id
 * `/ebb enable rule_id` - enable rule by id
 * `/ebb disable rule_id` - disable rule by id
 * `/ebb reset` - reset configuration, delete all rules. Note: no confirmation asked
-* `/ebb on` - enables monitoring, start combat logging, put this in pull macro
-* `/ebb off` - disables monitoring, stops combat logging, put this in wipe macro
+* `/ebb autologging on|off` - enables or disables automatic combatlogging on on/off command
+* `/ebb on` - enables monitoring, start combat logging if autologging is enabled (put this in pull macro)
+* `/ebb off` - disables monitoring, stops combat logging if autologging is disabled (put this in wipe macro)
 
 #EXAMPLE RULES
 My guilds Blackrock Foundry penalties (except last boss and Blast Furnance)
