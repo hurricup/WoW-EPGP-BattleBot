@@ -1,5 +1,5 @@
 #DESCRIPTION
-World of Warcraft addon for automatic GP charging by combatlog events: deaths, damage, debuffs. May be useful for saving your raid time due to the new encounters mastering.
+World of Warcraft addon for automatic EP/GP charging by combatlog events: deaths, damage, debuffs, interrupts and dispels. May be useful for saving your raid time due to the new encounters mastering.
 
 You may add/remove/enable/disable rules via console commands.
 
