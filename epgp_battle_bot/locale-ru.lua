@@ -4,9 +4,9 @@ EPGP_BB_HELP = {
     "WowRaider.Net EPGP Battle Bot %s.\nКоманды настройки /epgpbb или /ebb. Список опций:",
     "  /ebb help - показать помощь",
     "  /ebb status - показать текущие настройки аддона",
-    "  /ebb announce say|guild|raid|party - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд)",
+    "  /ebb announce (say|guild|raid|party) - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд или в say, если игрок не в рейде)",
     "  /ebb list - показать список существующих правил",
-    "  /ebb add GP_value on event - добавить новое правило начисления GP при событии. Доступные события:",
+    "  /ebb add value (EP|GP) on event - добавить новое правило начисления EP или GP при событии. Поддерживаются отрицательные числа. Доступные события:",
     "    death by spell_id - получение избыточного урона от способности по ее id",
     "    damagetaken by spell_id - получение урона от способности по ее id",
     "    buff spell_id [min_staks] - получение min_staks стаков баффа/дебаффа. 1 по умолчанию",
@@ -23,13 +23,16 @@ EPGP_BB_HELP = {
 }
 EPGP_BB_CONFIG_RESET = "Конфигурация сброшена\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
-EPGP_BB_RULE_DEATH_BY_PH = "%d GP за смерть от %s"
-EPGP_BB_RULE_BUFF_BY_PH = "%d GP за получение баффа %s"
 EPGP_BB_ACTIVE_RULES_HEADER = "Список действующих штрафов:"
-EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP за получение урона от %s"
-EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d GP за получение %d стаков бафа %s"
+
+EPGP_BB_RULE_DEATH_BY_PH = "%d %s за смерть от %s"
+EPGP_BB_RULE_BUFF_BY_PH = "%d %s за получение баффа %s"
+EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d %s за получение урона от %s"
+EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d %s за получение %d стаков бафа %s"
+
 EPGP_BB_RULE_PROTECT_CAST_PH = "иммунитет к штрафам за урон во время чтения заклинания %s"
 EPGP_BB_RULE_PROTECT_BUFF_PH = "иммунитет к штрафам за урон с баффом %s"
+
 EPGP_BB_RULE_NOT_FOUND = "Ошибка. Не могу найти правило %s. Список существующих правил:"
 EPGP_BB_RULE_ENABLED = "Включено правило: %s"
 EPGP_BB_RULE_DISABLED = "Выключено правило: %s"

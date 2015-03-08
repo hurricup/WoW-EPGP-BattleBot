@@ -2,9 +2,9 @@ EPGP_BB_HELP = {
     "WowRaider.Net EPGP Battle Bot %s.\nConfigurable by /epgpbb or /ebb commands. Options list:",
     "  /ebb help - display configuration help",
     "  /ebb status - displays current addon settings",
-    "  /ebb announce say|guild|raid|party - announce active rules to the specific channel (raid by default)",
+    "  /ebb announce (say|guild|raid|party) - announce active rules to the specific channel (raid by default, say if not in raid)",
     "  /ebb list - display the list of current rules",
-    "  /ebb add GP_value on event - add new rule to charge GP on event. Events are:",
+    "  /ebb add value (EP|GP) on event - add new rule to charge GP or EP on event. Negative values are supported. Events are:",
     "    death by spell_id - charge GP on taking damage with overkill from spell by id",
     "    damagetaken by spell_id - charge GP on taking damage from spell by id",
     "    buff spell_id [min_staks] - charge GP to players, gained min_staks of buff/debuff, 1 by default",
@@ -21,13 +21,16 @@ EPGP_BB_HELP = {
 }
 EPGP_BB_CONFIG_RESET = "Configuration has been reset\n"
 EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
-EPGP_BB_RULE_DEATH_BY_PH = "%d GP for death from %s"
-EPGP_BB_RULE_BUFF_BY_PH = "%d GP for gaining buff %s"
+
 EPGP_BB_RULE_PROTECT_CAST_PH = "immune to damage penalties while casting %s"
 EPGP_BB_RULE_PROTECT_BUFF_PH = "immune to damage penalties with buff %s"
-EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP for taking damage from %s"
+
+EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d %s for taking damage from %s"
+EPGP_BB_RULE_DEATH_BY_PH = "%d %s for death from %s"
+EPGP_BB_RULE_BUFF_BY_PH = "%d %s for gaining buff %s"
+EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d %s for gaining %d stacks of the buff %s"
+
 EPGP_BB_ACTIVE_RULES_HEADER = "List of active penalties:"
-EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d GP for gaining %d stacks of the buff %s"
 EPGP_BB_RULE_NOT_FOUND = "Error: unable to find rule %s. Here is the list of available rules:"
 EPGP_BB_RULE_ENABLED = "Enabled rule: %s"
 EPGP_BB_RULE_DISABLED = "Disabled rule: %s"
