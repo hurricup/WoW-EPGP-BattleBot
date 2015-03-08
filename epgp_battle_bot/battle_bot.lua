@@ -1,9 +1,8 @@
 local version = "6.1"
 
-local is_enabled = true
-local queue = {}
 local GS = LibStub("LibGuildStorage-1.2")
 
+-- legacy thing, remove with import_legacy_rules
 local config_keys = {
     "death",
     "damagedone",
@@ -13,44 +12,38 @@ local config_keys = {
     "protect_cast",
 };
 
-local active_rules = {}
+local queue = {}
 local protected = {}
 
-function battle_bot_make_active_rules()
-    active_rules = {}
-    for _, subtable in pairs(config_keys) do
-        if( config[subtable] ) then
-            active_rules[subtable] = {}
-            for _, item in pairs(config[subtable]) do
-                if( item["enabled"] ) then
-                    active_rules[subtable][item["spellid"]] = item
-                end
-            end
-        end
-    end
-    config["activerules"] = nil
+local player_name = ""
+local realm_name = ""
+local player_config = nil
+local rules = nil
+local active_rules = nil
+
+function battle_bot_add_penalty( section, new_rule, gp_value )
+    new_rule["gp_value"] = gp_value
+    battle_bot_add_rule( section, new_rule )
 end
 
-function battle_bot_add_penalty( section, item, gp_value )
-    item["gp_value"] = gp_value
-    battle_bot_add_rule( section, item )
-end
-
-function battle_bot_add_rule( section, item)
-    item["enabled"] = true
-    item["section"] = section
+-- refactored
+function battle_bot_add_rule( section, new_rule)
+    new_rule["enabled"] = true
+    new_rule["section"] = section
 
     local found = false
 
     local announce  = ""
-    for key, val in pairs( config[section] ) do
-        if( val['spellid'] == item['spellid'] ) then
-            local olditem = config[section][key]
-            config[section][key] = item
+    for index, rule in pairs(rules) do
+        if( 
+            rule['spellid'] == new_rule['spellid'] 
+            and rule['section'] == new_rule['section']
+        ) then
+            rules[index] = new_rule
             announce = string.format(
                 EPGP_BB_REPLACED_RULE
-                , battle_bot_get_rule_as_string(olditem)
-                , battle_bot_get_rule_as_string(item)
+                , battle_bot_get_rule_as_string(rule)
+                , battle_bot_get_rule_as_string(new_rule)
             )
             found = true
             break
@@ -58,10 +51,10 @@ function battle_bot_add_rule( section, item)
     end
     
     if( not found ) then
-        table.insert(config[section], item)
+        table.insert(rules, new_rule)
         announce = string.format(
             EPGP_BB_CREATED_RULE
-            , battle_bot_get_rule_as_string(item)
+            , battle_bot_get_rule_as_string(new_rule)
         )
     end
 
@@ -69,6 +62,7 @@ function battle_bot_add_rule( section, item)
     battle_bot_make_active_rules()
 end
 
+-- refactored
 function battle_bot_smart_announce(announce)
     if( announce ~= "" ) then
         if( UnitInRaid('player') == nil ) then
@@ -79,20 +73,7 @@ function battle_bot_smart_announce(announce)
     end
 end
 
-function battle_bot_check_config_keys()
-    for _, key in pairs(config_keys) do
-        if( not config[key] ) then
-            config[key] = {}
-        end
-    end
-end
-
-function battle_bot_reset_handler()
-    config = {}
-    battle_bot_check_config_keys()
-    print(EPGP_BB_CONFIG_RESET)
-end
-
+-- refactored
 function battle_bot_protect_handler( cmd, tail )
     -- /ebb protect by buff|cast spell_id
     local action, spell_id = string.match( tail, '^by%s+(%a+)%s+(%d+)$' )
@@ -113,6 +94,7 @@ function battle_bot_protect_handler( cmd, tail )
     end
 end
 
+-- refactored
 function battle_bot_add_handler( cmd, tail )                           
     local gp_value, action_base, action_ext, actor, tail = string.match( tail, '^(%d+)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
     if( 
@@ -142,33 +124,34 @@ function battle_bot_add_handler( cmd, tail )
     end
 end
 
+-- refactored
 function battle_bot_get_rule_as_string( item )
     local result
 
--- /ebb add 150 on damagetaken by 157247    
-    if( item['section'] == 'death' ) then
+    local section = item['section']
+    if( section == 'death' ) then
         result = string.format(
             EPGP_BB_RULE_DEATH_BY_PH
             , item["gp_value"]
             , (GetSpellLink(item["spellid"]))
         )
-    elseif( item['section'] == 'damagetaken' ) then
+    elseif( section == 'damagetaken' ) then
         result = string.format(
             EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH
             , item["gp_value"]
             , (GetSpellLink(item["spellid"]))
         )
-    elseif( item['section'] == 'protect_cast' ) then
+    elseif( section == 'protect_cast' ) then
         result = string.format(
             EPGP_BB_RULE_PROTECT_CAST_PH
             , (GetSpellLink(item["spellid"]))
         )
-    elseif( item['section'] == 'protect_buff' ) then
+    elseif( section == 'protect_buff' ) then
         result = string.format(
             EPGP_BB_RULE_PROTECT_BUFF_PH
             , (GetSpellLink(item["spellid"]))
         )
-    elseif( item['section'] == 'buff' ) then
+    elseif( section == 'buff' ) then
         if( item['stacks'] > 1 ) then
             result = string.format(
                 EPGP_BB_RULE_BUFF_STACKS_BY_PH
@@ -184,41 +167,39 @@ function battle_bot_get_rule_as_string( item )
             )
         end
     else
-        print( "Don't know how to stringify rule: "..item['section'].."\n" )
+        print( "Don't know how to stringify rule: "..section.."\n" )
         result = 'Unknown'
     end
     
     return result
 end
 
+-- refactored
 function battle_bot_get_rules_text()
     local result = {}
     local counter = 1
 
-    for _, subtable in pairs(config_keys) do
-        if( config[subtable] ) then
-            for _, item in pairs(config[subtable]) do
-                local newitem = {
-                    ["enabled"] = item["enabled"],
-                    ["enabled_text"] = EPGP_BB_DISABLED,
-                    ["counter"] = counter,
-                    ["rule"] = battle_bot_get_rule_as_string(item),
-                }
-                
-                if( item["enabled"] ) then
-                    newitem["enabled_text"] = EPGP_BB_ENABLED
-                end
-
-                table.insert( result, newitem )
-                
-                counter = counter + 1
-            end
+    for _, item in pairs(rules) do
+        local newitem = {
+            ["enabled"] = item["enabled"],
+            ["enabled_text"] = EPGP_BB_DISABLED,
+            ["counter"] = counter,
+            ["rule"] = battle_bot_get_rule_as_string(item),
+        }
+        
+        if( item["enabled"] ) then
+            newitem["enabled_text"] = EPGP_BB_ENABLED
         end
+
+        table.insert( result, newitem )
+        
+        counter = counter + 1
     end
     
     return result
 end
 
+-- refactored
 function battle_bot_list_handler( cmd, tail )
     local rules = battle_bot_get_rules_text()
     for _, rule in pairs(rules) do
@@ -233,6 +214,7 @@ function battle_bot_list_handler( cmd, tail )
     end
 end
 
+-- refactored
 function battle_bot_announce_handler( cmd, tail )
     local channel = string.lower(tail);
     
@@ -262,92 +244,81 @@ function battle_bot_announce_handler( cmd, tail )
     end
 end
 
-function battle_bot_get_rule_by_number(counter)
-    local index = tonumber(tail)
-    local counter = 1
-    
-    if( index ~= nil ) then
-        for _, subtable in pairs(config_keys) do
-            if( config[subtable] ) then
-                for key, item in pairs(config[subtable]) do
-                    if( counter == index ) then
-                        return subtable, key
-                    else
-                        counter = counter + 1
-                    end    
-                end
-            end
-        end
-    end
-
-    if( counter == nil ) then
-        counter = ""
-    end
-    print( string.format( EPGP_BB_RULE_NOT_FOUND, counter ))
-    
-end
-
+-- refactored
 function battle_bot_del_handler( cmd, tail )
-
-    local subtable, key = battle_bot_get_rule_by_number(tail)
-   
-    if( key ~= nil ) then
-        local item = config[subtable][key]
-        config[subtable][key] = nil
+    tail = tonumber(tail)
+    if( rules[tail] ~= nil ) then
+        local rule = table.remove(rules, tail)
         battle_bot_smart_announce(string.format(
             EPGP_BB_RULE_DELETED
-            , battle_bot_get_rule_as_string(item)
+            , battle_bot_get_rule_as_string(rule)
         ))
-        battle_bot_list_handler();
+        battle_bot_make_active_rules()
+    else
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
     end
-    battle_bot_make_active_rules()
+    battle_bot_list_handler();
 end
 
+-- refactored
 function battle_bot_enable_handler( cmd, tail )
-    local subtable, key = battle_bot_get_rule_by_number(tail)
-   
-    if( key ~= nil ) then
-        config[subtable][key]["enabled"] = true
+    tail = tonumber(tail)
+    if( rules[tail] ~= nil ) then
+        rules[tail]["enabled"] = true
         battle_bot_smart_announce(string.format(
             EPGP_BB_RULE_ENABLED
-            , battle_bot_get_rule_as_string(config[subtable][key])
+            , battle_bot_get_rule_as_string(rules[tail])
         ))
+        battle_bot_make_active_rules()
+    else
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
         battle_bot_list_handler();
     end
-    battle_bot_make_active_rules()
 end
 
+-- refactored
 function battle_bot_disable_handler( cmd, tail )
-    local subtable, key = battle_bot_get_rule_by_number(tail)
-    
-    if( key ~= nil ) then
-        config[subtable][key]["enabled"] = false
+    tail = tonumber(tail)
+    if( rules[tail] ~= nil ) then
+        rules[tail]["enabled"] = false
         battle_bot_smart_announce(string.format(
             EPGP_BB_RULE_DISABLED
-            , battle_bot_get_rule_as_string(config[subtable][key])
+            , battle_bot_get_rule_as_string(rules[tail])
         ))
+        battle_bot_make_active_rules()
+    else
+        print(string.format(EPGP_BB_RULE_NOT_FOUND, tail))
         battle_bot_list_handler();
     end
-    battle_bot_make_active_rules()
 end
 
+-- refactored
 function battle_bot_help_handler()
     for _, line in pairs(EPGP_BB_HELP) do
         print(line:format(version))
     end
 end
 
+-- refactored
 function battle_bot_turn_on_handler()
-    is_enabled = true
-    LoggingCombat(true)
+    player_config["enabled"] = true
+    if( player_config["autologging"] ) then
+        LoggingCombat(true)
+        battle_bot_smart_announce(EPGP_BB_LOGGING_ENABLED);
+    end
     battle_bot_smart_announce(EPGP_BB_ADDON_ENABLED)
 end
 
+-- refactored
 function battle_bot_turn_off_handler()
-    is_enabled = false
-    LoggingCombat(false)
+    player_config["enabled"] = false
+    if( player_config["autologging"] ) then
+        LoggingCombat(false)
+        battle_bot_smart_announce(EPGP_BB_LOGGING_DISABLED);
+    end
     battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
 end
+
 
 local slash_handlers = {
     status      = battle_bot_status_handler,
@@ -364,6 +335,7 @@ local slash_handlers = {
     off         = battle_bot_turn_off_handler,
 }
 
+-- refactored
 function battle_bot_slash_handler( msg, box)
     msg = string.lower(msg)
 
@@ -376,33 +348,10 @@ function battle_bot_slash_handler( msg, box)
     end
 end
 
-function battle_bot_validate_config()
-    if( not config) then
-        battle_bot_reset_handler()
-    end
-
-    battle_bot_check_config_keys()
-    battle_bot_make_active_rules()
-end
-
-function battle_bot_init()
-    battle_bot_validate_config()
-    
-    SLASH_EPGPBB1 = '/epgpbb';
-    SLASH_EPGPBB2 = '/ebb';
-    
-    SlashCmdList["EPGPBB"] = battle_bot_slash_handler
-end
-
-function battle_bot_register_events(self)
-    self:RegisterEvent("VARIABLES_LOADED")
-    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-end
-
--- /ebb add 1 on buff by 19740
+-- refactored
 function battle_bot_combatlog_parser(...)
 
-    if( not is_enabled ) then
+    if( not player_config["enabled"] ) then
         return
     end
 
@@ -515,6 +464,96 @@ function battle_bot_combatlog_parser(...)
    
 end
 
+function battle_bot_reset_handler()
+    player_config["rules"] = {}
+    print(EPGP_BB_CONFIG_RESET)
+end
+
+-- legacy, this function should be removed in release or two
+function battle_bot_make_active_rules()
+    active_rules = {}
+    for _, rule in pairs(rules) do
+    
+        local section = rule["section"]
+        
+        if( active_rules[section] == nil ) then
+            active_rules[section] = {}
+        end
+    
+        if( rule["enabled"] ) then
+            active_rules[section][rule["spellid"]] = rule
+        end
+    end
+end
+
+-- legacy, this function should be removed in release or two
+function battle_bot_import_legacy_rules()
+    for _, key in pairs(config_keys) do
+        if( config[key] ~= nil ) then
+            for _, rule in pairs( config[key] ) do
+                table.insert(player_config["rules"], rule)
+            end
+            config[key] = nil
+        end
+    end
+end
+
+-- refactored
+function battle_bot_check_config_keys()
+    if( player_config["enabled"] == nil ) then
+        player_config["enabled"] = true
+    end
+    if( player_config["autologging"] == nil ) then
+        player_config["autologging"] = true
+    end
+    if( player_config["rules"] == nil ) then
+        player_config["rules"] = {}
+        battle_bot_import_legacy_rules()
+    end    
+end
+
+-- refactored
+function battle_bot_validate_config()
+    if( config == nil ) then
+        config = {}
+    end
+
+    if( config[realm_name] == nil ) then
+        config[realm_name] = {}
+    end
+
+    if( config[realm_name][player_name] == nil ) then
+        config[realm_name][player_name] = {}
+    end
+    
+    player_config = config[realm_name][player_name];
+
+    battle_bot_check_config_keys()
+
+    rules = player_config["rules"]
+    
+    battle_bot_make_active_rules()
+end
+
+-- refactored
+function battle_bot_init()
+    SLASH_EPGPBB1 = '/epgpbb';
+    SLASH_EPGPBB2 = '/ebb';
+    
+    SlashCmdList["EPGPBB"] = battle_bot_slash_handler
+
+    realm_name = SelectedRealmName()
+    player_name = UnitName("player")
+    battle_bot_validate_config()
+end
+
+-- refactored
+function battle_bot_register_events(self)
+    self:RegisterEvent("VARIABLES_LOADED")
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+end
+
+-- refactored
 function battle_bot_event_handler(self, event, ...)
     if( event == "COMBAT_LOG_EVENT_UNFILTERED" ) then
         battle_bot_combatlog_parser(...)

@@ -17,7 +17,7 @@ Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
   * `death by spell_id` - taking damage with overkill from spell by id
   * `damagetaken by spell_id` - taking damage from spell by id
   * `buff by spell_id [min_stacks]` - gaining min_stacks of buff/debuff. 1 by default
-* `/ebb protect from [penalty_class] by` - protect from penalties of penalty_class by conditions:
+* `/ebb protect by` - protect from damage taken penalties of penalty_class by conditions:
   * `cast spell_id` - casting spell with spell_id (long important heals)
   * `buff spell_id` - having buff with spell_id (anti-magic shell)
 * `/ebb del rule_id` - delete rule by id

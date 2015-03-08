@@ -8,7 +8,7 @@ EPGP_BB_HELP = {
     "    death by spell_id - charge GP on taking damage with overkill from spell by id",
     "    damagetaken by spell_id - charge GP on taking damage from spell by id",
     "    buff spell_id [min_staks] - charge GP to players, gained min_staks of buff/debuff, 1 by default",
-    "  /ebb protect from [penalty_class] by - protect from penalties of penalty_class by conditions:",
+    "  /ebb protect by - protect from damage taken penalties of penalty_class by conditions:",
     "    cast spell_id - casting spell with spell_id (long important heals)",
     "    buff spell_id - having buff with spell_id (anti-magic shell)",
     "  /ebb del rule_id - delete rule by id",
@@ -28,10 +28,10 @@ EPGP_BB_RULE_PROTECT_BUFF_PH = "immune to damage penalties with buff %s"
 EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d GP for taking damage from %s"
 EPGP_BB_ACTIVE_RULES_HEADER = "List of active penalties:"
 EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d GP for gaining %d stacks of the buff %s"
-EPGP_BB_RULE_DELETED = "Deleted rule: %s"
 EPGP_BB_RULE_NOT_FOUND = "Error: unable to find rule %s. Here is the list of available rules:"
 EPGP_BB_RULE_ENABLED = "Enabled rule: %s"
 EPGP_BB_RULE_DISABLED = "Disabled rule: %s"
+EPGP_BB_RULE_DELETED = "Deleted rule: %s"
 EPGP_BB_ENABLED = "enabled"
 EPGP_BB_DISABLED = "disabled"
 EPGP_BB_SPELL_LINK = "|cff71d5ff|Hspell:%d|h[%s]|h|r"
@@ -39,3 +39,6 @@ EPGP_BB_CREATED_RULE = "Created rule: %s"
 EPGP_BB_REPLACED_RULE = "Replaced rule: '%s' with '%s'"
 EPGP_BB_ADDON_ENABLED = "EPGP Battle Bot enabled, be careful"
 EPGP_BB_ADDON_DISABLED = "EPGP Battle Bot disabled, relax"
+EPGP_BB_LOGGING_ENABLED = "Combatlog recording turned on"
+EPGP_BB_LOGGING_DISABLED = "Combatlog recording turned off"
+
