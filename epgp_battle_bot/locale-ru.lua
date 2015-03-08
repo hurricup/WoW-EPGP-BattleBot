@@ -15,6 +15,8 @@ EPGP_BB_HELP = {
     "    death by spell_id - получение избыточного урона от способности по ее id",
     "    damagetaken by spell_id - получение урона от способности по ее id",
     "    buff spell_id [min_staks] - получение min_staks стаков баффа/дебаффа. 1 по умолчанию",
+    "    interrupt spell_id - прерывание указанного заклинания",
+    "    dispel spell_id - рассеивание баффа/дебаффа",
     "  /ebb protect by - защищает от штрафов за получение урона при условии:",
     "    cast spell_id - чтение заклинания spell_id (длинные и важные хилы)",
     "    buff spell_id - наличие баффа spell_id (антимагический панцирь)",

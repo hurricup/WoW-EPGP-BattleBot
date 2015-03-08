@@ -481,6 +481,25 @@ function battle_bot_combatlog_parser(...)
         if( cast_rule ~= nil  and src_name ~= nil ) then
             protected[src_name] = nil
         end
+    elseif( event == "SPELL_INTERRUPT" ) then 
+        local target_spell = tonumber(arg[15])
+        local rule = active_rules["interrupt"][target_spell]
+        
+        if( rule ~= nil and src_name ~= nil ) then
+            active_rule = rule
+            rule_target = src_name
+        end
+    elseif( 
+        event == "SPELL_DISPEL" 
+        or event == "SPELL_STOLEN" 
+    ) then 
+        local target_spell = tonumber(arg[15])
+        local rule = active_rules["dispel"][target_spell]
+        
+        if( rule ~= nil and src_name ~= nil ) then
+            active_rule = rule
+            rule_target = src_name
+        end
     elseif( event == "UNIT_DIED" ) then
         if( dst_name ~= nil ) then
             protected[dst_name] = nil
@@ -524,7 +543,16 @@ end
 
 -- legacy, this function should be removed in release or two
 function battle_bot_make_active_rules()
-    active_rules = {}
+    active_rules = {
+        ["damagetaken"] = {},
+        ["buff"] = {},
+        ["death"] = {},
+        ["dispel"] = {},
+        ["interrupt"] = {},
+
+        ["protect_buff"] = {},
+        ["protect_cast"] = {},
+    }
     for _, rule in pairs(rules) do
     
         local section = rule["section"]
@@ -547,10 +575,6 @@ function battle_bot_make_active_rules()
             rule['spellid'] = tonumber(rule['spellid'])
         end
         -- end of legacy migration
-        
-        if( active_rules[section] == nil ) then
-            active_rules[section] = {}
-        end
     
         if( rule["enabled"] ) then
             active_rules[section][rule["spellid"]] = rule
