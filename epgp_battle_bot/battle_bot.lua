@@ -91,7 +91,7 @@ end
 
 
 function battle_bot_add_handler( cmd, tail )                           
-    local value, currency, action_base, action_ext, actor, tail = string.match( tail, '^(-?%d+)%s+(%ap)%s+on%s+(%a+)%s+(%a+)%s+(%w+)%s*(.*)$' )
+    local value, currency, action_base, action_ext, actor, tail = string.match( tail, '^(-?%d+)%s+(%ap)%s+for%s+(%a+)%s+(%w+)%s*(%w*)%s*(.*)$' )
     if( 
         action_base == 'damagetaken' 
         or action_base == 'death'
@@ -116,55 +116,86 @@ function battle_bot_add_handler( cmd, tail )
         else
             battle_bot_help_handler();
         end
+    elseif( 
+        action_base == 'interrupt' 
+        or action_base == 'dispel'
+    ) then
+        local spell_id = tonumber(action_ext)
+        if( spell_id ~= nil ) then
+            local item = {
+                ['type'] = 'spellid',
+                ['spellid'] = spell_id,
+                ['value'] = tonumber(value),
+                ['currency'] = string.upper(currency),
+            }
+            
+            battle_bot_add_rule( action_base, item )
+        else
+            battle_bot_help_handler();
+        end
     else
         battle_bot_help_handler();
     end
 end
 
 
-function battle_bot_get_rule_as_string( item )
+function battle_bot_get_rule_as_string( rule )
     local result
 
-    local section = item['section']
+    local section = rule['section']
     if( section == 'death' ) then
         result = string.format(
             EPGP_BB_RULE_DEATH_BY_PH
-            , item["value"]
-            , item["currency"]
-            , (GetSpellLink(item["spellid"]))
+            , rule["value"]
+            , rule["currency"]
+            , (GetSpellLink(rule["spellid"]))
         )
     elseif( section == 'damagetaken' ) then
         result = string.format(
             EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH
-            , item["value"]
-            , item["currency"]
-            , (GetSpellLink(item["spellid"]))
+            , rule["value"]
+            , rule["currency"]
+            , (GetSpellLink(rule["spellid"]))
+        )
+    elseif( section == 'interrupt' ) then
+        result = string.format(
+            EPGP_BB_RULE_INTERRUPT_PH
+            , rule["value"]
+            , rule["currency"]
+            , (GetSpellLink(rule["spellid"]))
+        )
+    elseif( section == 'dispel' ) then
+        result = string.format(
+            EPGP_BB_RULE_DISPEL_PH
+            , rule["value"]
+            , rule["currency"]
+            , (GetSpellLink(rule["spellid"]))
         )
     elseif( section == 'protect_cast' ) then
         result = string.format(
             EPGP_BB_RULE_PROTECT_CAST_PH
-            , (GetSpellLink(item["spellid"]))
+            , (GetSpellLink(rule["spellid"]))
         )
     elseif( section == 'protect_buff' ) then
         result = string.format(
             EPGP_BB_RULE_PROTECT_BUFF_PH
-            , (GetSpellLink(item["spellid"]))
+            , (GetSpellLink(rule["spellid"]))
         )
     elseif( section == 'buff' ) then
-        if( item['stacks'] > 1 ) then
+        if( rule['stacks'] > 1 ) then
             result = string.format(
                 EPGP_BB_RULE_BUFF_STACKS_BY_PH
-                , item["value"]
-                , item["currency"]
-                , item["stacks"]
-                , (GetSpellLink(item["spellid"]))
+                , rule["value"]
+                , rule["currency"]
+                , rule["stacks"]
+                , (GetSpellLink(rule["spellid"]))
             )
         else
             result = string.format(
                 EPGP_BB_RULE_BUFF_BY_PH
-                , item["value"]
-                , item["currency"]
-                , (GetSpellLink(item["spellid"]))
+                , rule["value"]
+                , rule["currency"]
+                , (GetSpellLink(rule["spellid"]))
             )
         end
     else

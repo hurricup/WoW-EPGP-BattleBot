@@ -11,7 +11,7 @@ EPGP_BB_HELP = {
     "  /ebb status - показать текущие настройки аддона",
     "  /ebb announce (say|guild|raid|party) - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд или в say, если игрок не в рейде)",
     "  /ebb list - показать список существующих правил",
-    "  /ebb add value (EP|GP) on event - добавить новое правило начисления EP или GP при событии. Поддерживаются отрицательные числа. Доступные события:",
+    "  /ebb add value (EP|GP) for event - добавить новое правило начисления EP или GP при событии. Поддерживаются отрицательные числа. Доступные события:",
     "    death by spell_id - получение избыточного урона от способности по ее id",
     "    damagetaken by spell_id - получение урона от способности по ее id",
     "    buff spell_id [min_staks] - получение min_staks стаков баффа/дебаффа. 1 по умолчанию",
@@ -34,6 +34,8 @@ EPGP_BB_RULE_DEATH_BY_PH = "%d %s за смерть от %s"
 EPGP_BB_RULE_BUFF_BY_PH = "%d %s за получение баффа %s"
 EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d %s за получение урона от %s"
 EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d %s за получение %d стаков бафа %s"
+EPGP_BB_RULE_INTERRUPT_PH = "%d %s за прерывание %s"
+EPGP_BB_RULE_DISPEL_PH = "%d %s за рассеивание/кражу %s"
 
 EPGP_BB_RULE_PROTECT_CAST_PH = "иммунитет к штрафам за урон во время чтения заклинания %s"
 EPGP_BB_RULE_PROTECT_BUFF_PH = "иммунитет к штрафам за урон с баффом %s"

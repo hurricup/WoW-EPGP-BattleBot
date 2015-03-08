@@ -9,7 +9,7 @@ EPGP_BB_HELP = {
     "  /ebb status - displays current addon settings",
     "  /ebb announce (say|guild|raid|party) - announce active rules to the specific channel (raid by default, say if not in raid)",
     "  /ebb list - display the list of current rules",
-    "  /ebb add value (EP|GP) on event - add new rule to charge GP or EP on event. Negative values are supported. Events are:",
+    "  /ebb add value (EP|GP) for event - add new rule to charge GP or EP on event. Negative values are supported. Events are:",
     "    death by spell_id - charge GP on taking damage with overkill from spell by id",
     "    damagetaken by spell_id - charge GP on taking damage from spell by id",
     "    buff spell_id [min_staks] - charge GP to players, gained min_staks of buff/debuff, 1 by default",
@@ -31,6 +31,8 @@ EPGP_BB_RULE_PH = "%d: (%s) %s" -- rule number, status, rule text
 EPGP_BB_RULE_PROTECT_CAST_PH = "immune to damage penalties while casting %s"
 EPGP_BB_RULE_PROTECT_BUFF_PH = "immune to damage penalties with buff %s"
 
+EPGP_BB_RULE_INTERRUPT_PH = "%d %s for interrupting %s"
+EPGP_BB_RULE_DISPEL_PH = "%d %s for dispelling/stealing %s"
 EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d %s for taking damage from %s"
 EPGP_BB_RULE_DEATH_BY_PH = "%d %s for death from %s"
 EPGP_BB_RULE_BUFF_BY_PH = "%d %s for gaining buff %s"
