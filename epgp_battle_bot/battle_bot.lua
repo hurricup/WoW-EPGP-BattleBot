@@ -1,4 +1,4 @@
-local version = "6.1"
+local version = "6.1.1"
 
 local GS = LibStub("LibGuildStorage-1.2")
 
@@ -335,8 +335,11 @@ end
 function battle_bot_turn_on_handler()
     player_config["enabled"] = true
     if( player_config["autologging"] ) then
-        LoggingCombat(true)
-        battle_bot_smart_announce(EPGP_BB_LOGGING_ENABLED);
+        if( LoggingCombat(true) ) then
+            battle_bot_smart_announce(EPGP_BB_LOGGING_ENABLED)
+        else
+            print("Error enabling logging")
+        end
     end
     battle_bot_smart_announce(EPGP_BB_ADDON_ENABLED)
 end
@@ -345,8 +348,11 @@ end
 function battle_bot_turn_off_handler()
     player_config["enabled"] = false
     if( player_config["autologging"] ) then
-        LoggingCombat(false)
-        battle_bot_smart_announce(EPGP_BB_LOGGING_DISABLED);
+        if( not LoggingCombat(false) ) then
+            battle_bot_smart_announce(EPGP_BB_LOGGING_DISABLED);
+        else
+            print("Error disabling logging")
+        end
     end
     battle_bot_smart_announce(EPGP_BB_ADDON_DISABLED)
 end
