@@ -247,11 +247,11 @@ end
 function battle_bot_announce_handler( cmd, tail )
     local channel = string.lower(tail);
     
-    if( 
-        channel ~= 'raid'
-        or channel ~= 'guild'
-        or channel ~= 'say'
-        or channel ~= 'party'
+    if not( 
+        channel == 'raid'
+        or channel == 'guild'
+        or channel == 'say'
+        or channel == 'party'
     ) then
         if( UnitInRaid('player') == nil ) then
             channel = 'say'
