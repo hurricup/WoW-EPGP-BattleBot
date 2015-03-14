@@ -1,6 +1,5 @@
-local version = "6.1.1"
-
 local GS = LibStub("LibGuildStorage-1.2")
+local version = GetAddOnMetadata("epgp_battle_bot", "Version")
 
 -- legacy thing, remove with import_legacy_rules
 local config_keys = {
@@ -639,6 +638,8 @@ end
 
 
 function battle_bot_init()
+    --version = 
+
     SLASH_EPGPBB1 = '/epgpbb';
     SLASH_EPGPBB2 = '/ebb';
     

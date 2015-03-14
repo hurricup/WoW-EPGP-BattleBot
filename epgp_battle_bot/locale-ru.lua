@@ -6,7 +6,8 @@ EPGP_BB_STATUS_AUTOLOGGING = "  Автоматическая запись ком
 EPGP_BB_STATUS_RULES = "  Добавлено правил: %s (введите /ebb list для просмотра)"
 
 EPGP_BB_HELP = {
-    EPGP_BB_STATUS_VERSION.."\nКоманды настройки /epgpbb или /ebb. Список опций:",
+    EPGP_BB_STATUS_VERSION,
+    "Команды настройки /epgpbb или /ebb. Список опций:",
     "  /ebb help - показать помощь",
     "  /ebb status - показать текущие настройки аддона",
     "  /ebb announce (say|guild|raid|party) - анонсировать активный набоор правил в указанный канал (по умолчанию, в рейд или в say, если игрок не в рейде)",

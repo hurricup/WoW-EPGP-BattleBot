@@ -4,7 +4,8 @@ EPGP_BB_STATUS_AUTOLOGGING = "  Automatic combatlogging: %s"
 EPGP_BB_STATUS_RULES = "  There are %s rules (type /ebb list to list them)"
 
 EPGP_BB_HELP = {
-    EPGP_BB_STATUS_VERSION.."\nConfigurable by /epgpbb or /ebb commands. Options list:",
+    EPGP_BB_STATUS_VERSION, 
+    "Configurable by /epgpbb or /ebb commands. Options list:",
     "  /ebb help - display configuration help",
     "  /ebb status - displays current addon settings",
     "  /ebb announce (say|guild|raid|party) - announce active rules to the specific channel (raid by default, say if not in raid)",
