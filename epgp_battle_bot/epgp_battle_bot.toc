@@ -1,6 +1,6 @@
 ## Interface: 60100
 ## Title: EPGP Battle Bot
-## Version: 6.1.2
+## Version: 6.1.3
 ## Author: Alexandr Evstigneev (hurricup@evstigneev.com)
 ## Notes: Addon for automatic EP/GP charging by combatlog events
 ## Notes-ruRU: Аддон для автоматического начисления EP/GP по событиям в логах сражений

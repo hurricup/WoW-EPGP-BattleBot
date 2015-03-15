@@ -20,6 +20,18 @@ local player_config = nil
 local rules = nil
 local active_rules = nil
 
+-- http://lua-users.org/wiki/FormattingNumbers
+function format_number(amount)
+    local formatted = amount
+
+    while true do  
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if (k==0) then
+            break
+        end
+    end
+    return formatted
+end
 
 function battle_bot_add_rule( section, new_rule)
     new_rule["enabled"] = true
@@ -73,13 +85,11 @@ function battle_bot_protect_handler( cmd, tail )
     local action, spell_id = string.match( tail, '^by%s+(%a+)%s+(%d+)$' )
     if( action == 'cast' ) then
         local item = {
-            ['type'] = 'spellid',
             ['spellid'] = spell_id
         }
         battle_bot_add_rule( 'protect_cast', item )
     elseif( action == 'buff' ) then
         local item = {
-            ['type'] = 'spellid',
             ['spellid'] = spell_id
         }
         battle_bot_add_rule( 'protect_buff', item )
@@ -98,16 +108,24 @@ function battle_bot_add_handler( cmd, tail )
     ) then
         if( action_ext == 'by' ) then
             local item = {
-                ['type'] = 'spellid',
                 ['spellid'] = tonumber(actor),
                 ['value'] = tonumber(value),
                 ['currency'] = string.upper(currency),
             }
-            
+
+            -- buff min stacks
             if( action_base == 'buff' ) then
                 item["stacks"] = tonumber(tail)
                 if( item["stacks"] == nil ) then
                     item["stacks"] = 1
+                end
+            end
+
+            -- min taken damage
+            if( action_base == 'damagetaken' ) then
+                item["damage_amount"] = tonumber(tail)
+                if( item["damage_amount"] == nil ) then
+                    item["damage_amount"] = 0
                 end
             end
             
@@ -122,7 +140,6 @@ function battle_bot_add_handler( cmd, tail )
         local spell_id = tonumber(action_ext)
         if( spell_id ~= nil ) then
             local item = {
-                ['type'] = 'spellid',
                 ['spellid'] = spell_id,
                 ['value'] = tonumber(value),
                 ['currency'] = string.upper(currency),
@@ -150,12 +167,22 @@ function battle_bot_get_rule_as_string( rule )
             , (GetSpellLink(rule["spellid"]))
         )
     elseif( section == 'damagetaken' ) then
-        result = string.format(
-            EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH
-            , rule["value"]
-            , rule["currency"]
-            , (GetSpellLink(rule["spellid"]))
-        )
+        if( rule['damage_amount'] > 0 ) then
+            result = string.format(
+                EPGP_BB_RULE_DAMAGE_TAKEN_AMOUNT_BY_PH
+                , rule["value"]
+                , rule["currency"]
+                , format_number(rule["damage_amount"])
+                , (GetSpellLink(rule["spellid"]))
+            )
+        else
+            result = string.format(
+                EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH
+                , rule["value"]
+                , rule["currency"]
+                , (GetSpellLink(rule["spellid"]))
+            )
+        end
     elseif( section == 'interrupt' ) then
         result = string.format(
             EPGP_BB_RULE_INTERRUPT_PH
@@ -419,6 +446,7 @@ function battle_bot_combatlog_parser(...)
     local timestamp, event, _, src_guid, src_name, src_flags, src_raid_flags, dst_guid, dst_name, dst_flags, dst_raid_flags, spell_id, spell_name, spell_school = ... -- 14 items
     
     local rule_target = dst_name
+    local rule_target_guid = dst_guid
     local active_rule = nil
     
     if( event == "SPELL_AURA_APPLIED" ) then
@@ -455,14 +483,26 @@ function battle_bot_combatlog_parser(...)
     elseif( event == "SPELL_DAMAGE" ) then
         local death_rule = active_rules["death"][spell_id]
         local damagetaken_rule = active_rules["damagetaken"][spell_id]
-
-        if( death_rule ~= nil and tonumber(arg[16]) > 0 ) then
+        local damage_amount, damage_overkill = tonumber(arg[15]), tonumber(arg[16]);
+        
+        -- Not yet necessary
+        -- local damage_resisted = tonumber(arg[18]);
+        -- local damage_blocked = tonumber(arg[19]);
+        -- local damage_absorbed = tonumber(arg[20]);
+        
+        local damage_total = damage_amount + damage_overkill;
+        if( damage_overkill == 0 ) then -- precise kill
+            damage_total = damage_total + 1
+        end
+        
+        if( death_rule ~= nil and damage_overkill > -1 ) then   -- death by spell
             active_rule = death_rule
         elseif( 
-            damagetaken_rule ~= nil         -- got rule
+            damagetaken_rule ~= nil                                 -- got damagetaken rule
+            and damage_total > damagetaken_rule['damage_amount']    -- passed threshold
             and ( 
                 protected[dst_name] == nil  -- not protected
-                or tonumber(arg[16]) > 0    -- or died
+                or damage_overkill > -1     -- or died
             )
         ) then 
             active_rule = damagetaken_rule
@@ -491,8 +531,7 @@ function battle_bot_combatlog_parser(...)
         local rule = active_rules["interrupt"][target_spell]
         
         if( rule ~= nil and src_name ~= nil ) then
-            active_rule = rule
-            rule_target = src_name
+            active_rule, rule_target, rule_target_guid = rule, src_name, src_guid
         end
     elseif( 
         event == "SPELL_DISPEL" 
@@ -502,8 +541,7 @@ function battle_bot_combatlog_parser(...)
         local rule = active_rules["dispel"][target_spell]
         
         if( rule ~= nil and src_name ~= nil ) then
-            active_rule = rule
-            rule_target = src_name
+            active_rule, rule_target, rule_target_guid = rule, src_name, src_guid
         end
     elseif( event == "UNIT_DIED" ) then
         if( dst_name ~= nil ) then
@@ -512,7 +550,11 @@ function battle_bot_combatlog_parser(...)
     end
 
     -- push to queue, should check that we are in guild
-    if( active_rule ~= nil and rule_target ~= nil ) then
+    if( 
+        active_rule ~= nil 
+        and rule_target ~= nil 
+        and (string.find(rule_target_guid, 'Player')) == 1
+    ) then
         table.insert(queue, {
             ["player"] = rule_target,
             ["rule"] = active_rule
@@ -532,13 +574,13 @@ function battle_bot_combatlog_parser(...)
             if( EPGP:CanIncGPBy(reason, value) ) then
                 EPGP:IncGPBy( player, reason, value )
             else
-                print("Unabe to charge GP", player, reason, value)
+                print("Unabe to charge GP", player, reason, value) -- debugging
             end
         else
             if( EPGP:CanIncEPBy(reason, value) ) then
                 EPGP:IncEPBy( player, reason, value )
             else
-                print("Unabe to charge EP", player, reason, value)
+                print("Unabe to charge EP", player, reason, value) -- debugging
             end
         end
     end
@@ -579,6 +621,15 @@ function battle_bot_make_active_rules()
         if( rule['spellid'] ~= tonumber(rule['spellid'])) then
             rule['spellid'] = tonumber(rule['spellid'])
         end
+
+        if( 
+            rule['section'] == 'damagetaken' 
+            and rule['damage_amount'] == nil 
+        ) then
+            rule['damage_amount'] = 0
+        end
+        
+        rule['type'] = nil
         -- end of legacy migration
     
         if( rule["enabled"] ) then

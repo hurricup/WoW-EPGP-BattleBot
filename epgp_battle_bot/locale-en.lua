@@ -12,8 +12,8 @@ EPGP_BB_HELP = {
     "  /ebb list - display the list of current rules",
     "  /ebb add value (EP|GP) for event - add new rule to charge GP or EP on event. Negative values are supported. Events are:",
     "    death by spell_id - taking damage with overkill from spell by id",
-    "    damagetaken by spell_id - taking damage from spell by id",
-    "    buff spell_id [min_staks] - gaining min_staks of buff/debuff, 1 by default",
+    "    damagetaken by spell_id [min_damage] - taking min_damage damage from spell by id, any amount by default",
+    "    buff by spell_id [min_staks] - gaining min_staks of buff/debuff, 1 by default",
     "    interrupt spell_id - interrupting specific spell",
     "    dispel spell_id - dispelling specific buff/debuff",
     "  /ebb protect by - protect from damage taken penalties of penalty_class by conditions:",
@@ -37,6 +37,7 @@ EPGP_BB_RULE_PROTECT_BUFF_PH = "immune to damage penalties with buff %s"
 EPGP_BB_RULE_INTERRUPT_PH = "%d %s for interrupting %s"
 EPGP_BB_RULE_DISPEL_PH = "%d %s for dispelling/stealing %s"
 EPGP_BB_RULE_DAMAGE_TAKEN_BY_PH = "%d %s for taking damage from %s"
+EPGP_BB_RULE_DAMAGE_TAKEN_AMOUNT_BY_PH = "%d %s for taking more than %s damage from %s"
 EPGP_BB_RULE_DEATH_BY_PH = "%d %s for death from %s"
 EPGP_BB_RULE_BUFF_BY_PH = "%d %s for gaining buff %s"
 EPGP_BB_RULE_BUFF_STACKS_BY_PH = "%d %s for gaining %d stacks of the buff %s"

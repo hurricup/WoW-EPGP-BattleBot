@@ -16,7 +16,7 @@ Addon configuration may be managed via `/epgpbb` or `/ebb` slash commands:
 * `/ebb list` - list of current configuration and rules
 * `/ebb add value (GP|EP) for event` - add new rule to charge GP or EP on event. Negative values supported. Events are:
   * `death by spell_id` - taking damage with overkill from spell by id
-  * `damagetaken by spell_id` - taking damage from spell by id
+  * `damagetaken by spell_id [min_damage]` - taking min_damage damage from spell by id, any damage by default
   * `buff by spell_id [min_stacks]` - gaining min_stacks of buff/debuff. 1 by default
   * `interrupt spell_id` - interrupting spell
   * `dispel spell_id` - dispelling/spellstealing spell
