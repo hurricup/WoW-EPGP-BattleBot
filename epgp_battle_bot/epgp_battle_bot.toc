@@ -9,7 +9,7 @@
 ## RequiredDeps: epgp
 ## X-Website: https://github.com/hurricup/WoW-EPGP-BattleBot
 ## X-Feedback: https://github.com/hurricup/WoW-EPGP-BattleBot/issues
+embeds.xml
 locale-en.lua
 locale-ru.lua
 battle_bot.lua
-battle_bot.xml

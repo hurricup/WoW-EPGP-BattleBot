@@ -1,6 +1,8 @@
+EBB = LibStub("AceAddon-3.0"):NewAddon("EPGPBattleBot", "AceConsole-3.0", "AceEvent-3.0")
+local EBB = EBB
 local GS = LibStub("LibGuildStorage-1.2")
-local version = GetAddOnMetadata("epgp_battle_bot", "Version")
 
+---------------------- pre Ace section -----------------------------------------
 -- legacy thing, remove with import_legacy_rules
 local config_keys = {
     "death",
@@ -19,19 +21,6 @@ local realm_name = ""
 local player_config = nil
 local rules = nil
 local active_rules = nil
-
--- http://lua-users.org/wiki/FormattingNumbers
-function format_number(amount)
-    local formatted = amount
-
-    while true do  
-        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if (k==0) then
-            break
-        end
-    end
-    return formatted
-end
 
 function battle_bot_add_rule( section, new_rule)
     new_rule["enabled"] = true
@@ -94,7 +83,7 @@ function battle_bot_protect_handler( cmd, tail )
         }
         battle_bot_add_rule( 'protect_buff', item )
     else
-        battle_bot_help_handler();
+        EBB:HelpHandler();
     end
 end
 
@@ -131,7 +120,7 @@ function battle_bot_add_handler( cmd, tail )
             
             battle_bot_add_rule( action_base, item )
         else
-            battle_bot_help_handler();
+            EBB:HelpHandler();
         end
     elseif( 
         action_base == 'interrupt' 
@@ -147,10 +136,10 @@ function battle_bot_add_handler( cmd, tail )
             
             battle_bot_add_rule( action_base, item )
         else
-            battle_bot_help_handler();
+            EBB:HelpHandler();
         end
     else
-        battle_bot_help_handler();
+        EBB:HelpHandler();
     end
 end
 
@@ -172,7 +161,7 @@ function battle_bot_get_rule_as_string( rule )
                 EPGP_BB_RULE_DAMAGE_TAKEN_AMOUNT_BY_PH
                 , rule["value"]
                 , rule["currency"]
-                , format_number(rule["damage_amount"])
+                , EBB:FormatNumber(rule["damage_amount"])
                 , (GetSpellLink(rule["spellid"]))
             )
         else
@@ -350,14 +339,6 @@ function battle_bot_disable_handler( cmd, tail )
     end
 end
 
-
-function battle_bot_help_handler()
-    for _, line in pairs(EPGP_BB_HELP) do
-        print(line:format(version))
-    end
-end
-
-
 function battle_bot_turn_on_handler()
     player_config["enabled"] = true
     if( player_config["autologging"] ) then
@@ -391,7 +372,7 @@ function battle_bot_autologging_handler(cmd,tail)
         player_config['autologging'] = false
         print(EPGP_BB_AUTOLOGGING_DISABLED)
     else
-        battle_bot_help_handler()
+        EBB:HelpHandler()
     end
 end
 
@@ -401,13 +382,99 @@ function battle_bot_reset_handler()
 end
 
 function battle_bot_status_handler()
-    print(string.format(EPGP_BB_STATUS_VERSION, version))
+    print(string.format(EPGP_BB_STATUS_VERSION, EBB.version))
     print(string.format(EPGP_BB_STATUS_STATUS, EPGP_BB_STATE[player_config["enabled"]]))
     print(string.format(EPGP_BB_STATUS_AUTOLOGGING, EPGP_BB_STATE[player_config["autologging"]]))
     print(string.format(EPGP_BB_STATUS_RULES, table.getn(rules)))
 end
 
-local slash_handlers = {
+function battle_bot_combatlog_parser(...)
+
+   
+end
+
+
+-- legacy, this function should be removed in release or two
+function battle_bot_make_active_rules()
+    active_rules = {
+        ["damagetaken"] = {},
+        ["buff"] = {},
+        ["death"] = {},
+        ["dispel"] = {},
+        ["interrupt"] = {},
+
+        ["protect_buff"] = {},
+        ["protect_cast"] = {},
+    }
+    for _, rule in pairs(rules) do
+    
+        local section = rule["section"]
+
+        -- legacy migrating
+        if( rule['value'] == nil and rule['gp_value'] ~= nil ) then
+            rule['value'] = tonumber(rule['gp_value'])
+            rule['gp_value'] = nil
+        end
+        
+        if( rule['currency'] == nil ) then
+            rule['currency'] = 'GP'
+        end
+        
+        if( rule['value'] ~= tonumber(rule['value'])) then
+            rule['value'] = tonumber(rule['value'])
+        end
+        
+        if( rule['spellid'] ~= tonumber(rule['spellid'])) then
+            rule['spellid'] = tonumber(rule['spellid'])
+        end
+
+        if( 
+            rule['section'] == 'damagetaken' 
+            and rule['damage_amount'] == nil 
+        ) then
+            rule['damage_amount'] = 0
+        end
+        
+        rule['type'] = nil
+        -- end of legacy migration
+    
+        if( rule["enabled"] ) then
+            active_rules[section][rule["spellid"]] = rule
+        end
+    end
+end
+
+-- legacy, this function should be removed in release or two
+function battle_bot_import_legacy_rules()
+    for _, key in pairs(config_keys) do
+        if( config[key] ~= nil ) then
+            for _, rule in pairs( config[key] ) do
+                table.insert(player_config["rules"], rule)
+            end
+            config[key] = nil
+        end
+    end
+end
+
+
+function battle_bot_check_config_keys()
+    if( player_config["enabled"] == nil ) then
+        player_config["enabled"] = true
+    end
+    if( player_config["autologging"] == nil ) then
+        player_config["autologging"] = true
+    end
+    if( player_config["rules"] == nil ) then
+        player_config["rules"] = {}
+        battle_bot_import_legacy_rules()
+    end    
+end
+
+
+----------------------- ACE section --------------------------------------------
+
+EBB.version = GetAddOnMetadata("epgp_battle_bot", "Version")
+EBB.slash_handlers = {
     status      = battle_bot_status_handler,
     autologging = battle_bot_autologging_handler,
     list        = battle_bot_list_handler,
@@ -423,21 +490,34 @@ local slash_handlers = {
 }
 
 
-function battle_bot_slash_handler( msg, box)
-    msg = string.lower(msg)
+function EBB:OnInitialize()
+    EBB:Print("Initialise enabled")
+    EBB:RegisterEvent("VARIABLES_LOADED")
+    EBB:RegisterEvent("PLAYER_REGEN_DISABLED")
+    EBB:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    EBB:RegisterChatCommand("ebb", "SlashHandler")
+end
 
-    cmd, tail = string.match( msg, '^%s*(%a+)%s*(.*)$');
-    
-    if( slash_handlers[cmd] ) then
-        slash_handlers[cmd](cmd, tail)
-    else
-        battle_bot_help_handler();
-    end
+function EBB:OnEnable()
+    EBB:Print("EBB enabled")
+end
+
+function EBB:OnDisable()
+    EBB:Print("EBB disabled")
 end
 
 
-function battle_bot_combatlog_parser(...)
+function EBB:VARIABLES_LOADED()
+    realm_name = SelectedRealmName()
+    player_name = UnitName("player")
+    EBB:ValidateConfig()
+end
 
+function EBB:PLAYER_REGEN_DISABLED()
+    protected = {}
+end
+
+function EBB:COMBAT_LOG_EVENT_UNFILTERED(...)
     if( not player_config["enabled"] ) then
         return
     end
@@ -584,88 +664,9 @@ function battle_bot_combatlog_parser(...)
             end
         end
     end
-   
 end
 
-
--- legacy, this function should be removed in release or two
-function battle_bot_make_active_rules()
-    active_rules = {
-        ["damagetaken"] = {},
-        ["buff"] = {},
-        ["death"] = {},
-        ["dispel"] = {},
-        ["interrupt"] = {},
-
-        ["protect_buff"] = {},
-        ["protect_cast"] = {},
-    }
-    for _, rule in pairs(rules) do
-    
-        local section = rule["section"]
-
-        -- legacy migrating
-        if( rule['value'] == nil and rule['gp_value'] ~= nil ) then
-            rule['value'] = tonumber(rule['gp_value'])
-            rule['gp_value'] = nil
-        end
-        
-        if( rule['currency'] == nil ) then
-            rule['currency'] = 'GP'
-        end
-        
-        if( rule['value'] ~= tonumber(rule['value'])) then
-            rule['value'] = tonumber(rule['value'])
-        end
-        
-        if( rule['spellid'] ~= tonumber(rule['spellid'])) then
-            rule['spellid'] = tonumber(rule['spellid'])
-        end
-
-        if( 
-            rule['section'] == 'damagetaken' 
-            and rule['damage_amount'] == nil 
-        ) then
-            rule['damage_amount'] = 0
-        end
-        
-        rule['type'] = nil
-        -- end of legacy migration
-    
-        if( rule["enabled"] ) then
-            active_rules[section][rule["spellid"]] = rule
-        end
-    end
-end
-
--- legacy, this function should be removed in release or two
-function battle_bot_import_legacy_rules()
-    for _, key in pairs(config_keys) do
-        if( config[key] ~= nil ) then
-            for _, rule in pairs( config[key] ) do
-                table.insert(player_config["rules"], rule)
-            end
-            config[key] = nil
-        end
-    end
-end
-
-
-function battle_bot_check_config_keys()
-    if( player_config["enabled"] == nil ) then
-        player_config["enabled"] = true
-    end
-    if( player_config["autologging"] == nil ) then
-        player_config["autologging"] = true
-    end
-    if( player_config["rules"] == nil ) then
-        player_config["rules"] = {}
-        battle_bot_import_legacy_rules()
-    end    
-end
-
-
-function battle_bot_validate_config()
+function EBB:ValidateConfig()
     if( config == nil ) then
         config = {}
     end
@@ -688,31 +689,33 @@ function battle_bot_validate_config()
 end
 
 
-function battle_bot_init()
-    --version = 
-
-    SLASH_EPGPBB1 = '/epgpbb';
-    SLASH_EPGPBB2 = '/ebb';
+function EBB:SlashHandler( msg )
+    msg = string.lower(msg)
     
-    SlashCmdList["EPGPBB"] = battle_bot_slash_handler
-
-    realm_name = SelectedRealmName()
-    player_name = UnitName("player")
-    battle_bot_validate_config()
-end
-
-
-function battle_bot_register_events(self)
-    self:RegisterEvent("VARIABLES_LOADED")
-    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-end
-
-function battle_bot_event_handler(self, event, ...)
-    if( event == "COMBAT_LOG_EVENT_UNFILTERED" ) then
-        battle_bot_combatlog_parser(...)
-    elseif( event == "PLAYER_REGEN_DISABLED" ) then -- entering combat
-        protected = {}
-    elseif( event == "VARIABLES_LOADED" ) then
-        battle_bot_init()
+    cmd, tail = string.match( msg, '^%s*(%a+)%s*(.*)$');
+    
+    if( self.slash_handlers[cmd] ) then
+        self.slash_handlers[cmd](cmd, tail)
+    else
+        self:HelpHandler();
     end
+end
+
+function EBB:HelpHandler()
+    for _, line in pairs(EPGP_BB_HELP) do
+        print(line:format(EBB.version))
+    end
+end
+
+-- http://lua-users.org/wiki/FormattingNumbers
+function EBB:FormatNumber(amount)
+    local formatted = amount
+
+    while true do  
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if (k==0) then
+            break
+        end
+    end
+    return formatted
 end
