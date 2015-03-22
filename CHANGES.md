@@ -1,3 +1,6 @@
+#Release 6.1.4 (in development)
+* Migrated to Ace libraries
+
 #Release 6.1.3, Sun, 15 Mar 2015
 * Added checking that rule target is a player, not a pet or something
 * Fixed typo in help for `buff` rule
